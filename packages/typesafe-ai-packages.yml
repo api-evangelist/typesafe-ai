@@ -1,0 +1,230 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  Registry metadata endpoints read unauthenticated on 2026-09-19 — registry.npmjs.org, pypi.org/pypi
+  JSON, rubygems.org/api/v1, crates.io/api/v1, api.nuget.org, proxy.golang.org — plus
+  https://docs.typesafe.ai/sdk and the github.com/typesafe-ai organisation listing.
+checked: '2026-09-19'
+summary:
+  first_party_package_count: 3
+  official_client_sdk_count: 2
+  third_party_package_count: 4
+  note: >-
+    TypeSafe ships two official client SDKs (Python and TypeScript/JavaScript), both published from
+    its own GitHub org and both released within the last week of this probe, plus a first-party
+    adapter package. The SDK freshness is the notable finding: typesafe-sdk 0.7.0 was published
+    2026-09-18 and @typesafe-ai/sdk 0.6.0 on 2026-09-15, against an API whose served spec declares
+    info.version 0.2.0 — the clients are moving faster than the contract, the opposite of the
+    abandonment signal this artifact usually surfaces.
+github_organization:
+  found: true
+  url: https://github.com/typesafe-ai
+  login: typesafe-ai
+  display_name: TypeSafe
+  blog: https://typesafe.ai/
+  created: '2024-05-28'
+  public_repos: 10
+  first_party_repos:
+    - {name: typesafe-sdk-python, language: Python, pushed: '2026-09-18', description: The official Python library for the TypeSafe API}
+    - {name: typesafe-sdk-js, language: TypeScript, pushed: '2026-09-15', description: The official TypeScript/JavaScript library for the TypeSafe API}
+    - {name: skills, pushed: '2026-09-12', description: Agent skills for building with TypeSafe's System One API}
+    - {name: system-one-adapter-python, language: Python, pushed: '2026-09-18', description: Drop-in TypeSafeClient replacement backed by LLM APIs}
+    - {name: typesafe-ai.github.io, language: HTML, pushed: '2026-06-04'}
+    - {name: daggerverse, language: Python, pushed: '2026-09-09', description: Collection of useful Dagger modules}
+    - {name: Overwatch, language: Python, pushed: '2026-09-03'}
+  forks_note: >-
+    The org also carries forks of vllm, LLaDA and pulumi-clickhouse (last pushed 2025-05 to
+    2026-07). Infrastructure forks, not client libraries — recorded so a later round does not read
+    them as TypeSafe products.
+packages:
+  - language: python
+    registry: pypi
+    name: typesafe-sdk
+    url: https://pypi.org/project/typesafe-sdk/
+    install: pip install typesafe-sdk
+    alt_install: uv add typesafe-sdk
+    official: true
+    version: 0.7.0
+    published: '2026-09-18'
+    summary: Python SDK for TypeSafe AI API.
+    repository: https://github.com/typesafe-ai/typesafe-sdk-python
+    docs: https://docs.typesafe.ai/sdk/python
+    changelog: https://docs.typesafe.ai/sdk/python/changelog
+    import_name: typesafe_sdk
+    clients: [TypeSafeClient, AsyncTypeSafeClient]
+    features:
+      - Typed Noul / Choice / Score question objects
+      - RetryPolicy with configurable attempt count, retryable statuses, backoff and retry-header handling
+      - 'Reads TYPESAFE_API_KEY from the environment'
+      - 'pydantic response_model argument for additional type-safety (added 0.7.0)'
+    release_history: [0.0.1a0, 0.5.7, 0.6.0, 0.7.0]
+    official_basis: >-
+      Published from github.com/typesafe-ai/typesafe-sdk-python, the company's own GitHub org;
+      PyPI project_urls Homepage is https://typesafe.ai; documented as the first-party SDK at
+      https://docs.typesafe.ai/sdk/python.
+    source: https://pypi.org/pypi/typesafe-sdk/json
+  - language: typescript
+    registry: npm
+    name: '@typesafe-ai/sdk'
+    url: https://www.npmjs.com/package/@typesafe-ai/sdk
+    install: npm install @typesafe-ai/sdk
+    official: true
+    version: 0.6.0
+    published: '2026-09-15'
+    description: TypeScript SDK for the TypeSafe API
+    license: MIT
+    repository: https://github.com/typesafe-ai/typesafe-sdk-js
+    homepage: https://docs.typesafe.ai/sdk/javascript
+    changelog: https://docs.typesafe.ai/sdk/javascript/changelog
+    runtime: Node.js 20 or newer
+    distributions: [ESM, CommonJS, TypeScript declarations]
+    features:
+      - 'Answer types inferred from the questions you pass (choice()/score()/noul() helpers)'
+      - Automatic retries with a default retry policy
+      - 'Reads TYPESAFE_API_KEY from the environment'
+    official_basis: >-
+      Scoped to the @typesafe-ai npm organisation, repository is
+      github.com/typesafe-ai/typesafe-sdk-js, and it is the SDK documented at
+      https://docs.typesafe.ai/sdk/javascript.
+    source: https://registry.npmjs.org/@typesafe-ai%2Fsdk
+  - language: python
+    registry: pypi
+    name: system-one-adapter
+    url: https://pypi.org/project/system-one-adapter/
+    install: pip install system-one-adapter
+    official: true
+    version: 0.2.0
+    published: '2026-09-18'
+    summary: Drop-in TypeSafeClient replacement backed by LLM APIs
+    author: TypeSafe AI <support@typesafe.ai>
+    repository: https://github.com/typesafe-ai/system-one-adapter-python
+    changelog: https://github.com/typesafe-ai/system-one-adapter-python/blob/main/docs/changelog.md
+    release_history: [0.0.1a0, 0.1.3, 0.1.4, 0.1.5, 0.2.0]
+    kind: adapter
+    kind_note: >-
+      Not a client for the TypeSafe API — the inverse. It presents the TypeSafeClient interface but
+      routes the call to an ordinary LLM API, so a codebase written against System One can run
+      against an LLM (for comparison, fallback, or local development without a key). Counted as a
+      first-party package but NOT as one of the two official client SDKs.
+    official_basis: 'PyPI author "TypeSafe AI" <support@typesafe.ai>; repository is in the company''s own GitHub org.'
+    source: https://pypi.org/pypi/system-one-adapter/json
+third_party_packages:
+  - language: ruby
+    registry: rubygems
+    name: typesafe-sdk
+    url: https://rubygems.org/gems/typesafe-sdk
+    official: false
+    version: 0.3.0
+    published: '2026-09-16'
+    owner: joshmn (RubyGems handle)
+    repository: https://github.com/joshmn/typesafe-sdk
+    license: MIT
+    description: >-
+      Ask TypeSafe models typed Noul, Choice, and Score questions about text or structured state and
+      get calibrated, structured answers back.
+    ownership_basis: >-
+      RubyGems owners endpoint returns a single owner, handle "joshmn"; homepage and source point at
+      github.com/joshmn, not github.com/typesafe-ai. It does set documentation_uri to
+      https://docs.typesafe.ai/, which is why a name-only check would misread it as first-party.
+    source: https://rubygems.org/api/v1/gems/typesafe-sdk.json
+  - language: rust
+    registry: crates.io
+    name: typesafe-sdk
+    url: https://crates.io/crates/typesafe-sdk
+    official: false
+    version: 0.1.2
+    published: '2026-09-17'
+    owner: codeitlikemiley (Uriah Galang)
+    repository: https://github.com/codeitlikemiley/typesafe-sdk-rust
+    description: Rust SDK for the TypeSafe AI API
+    ownership_basis: 'crates.io owners endpoint returns one user, codeitlikemiley; repository is outside the typesafe-ai org.'
+    source: https://crates.io/api/v1/crates/typesafe-sdk
+  - language: typescript
+    registry: npm
+    name: pi-typesafe
+    url: https://www.npmjs.com/package/pi-typesafe
+    official: false
+    version: 0.6.0
+    published: null
+    published_note: 'Release date not read; surfaced by npm text search rather than by a metadata fetch.'
+    repository: https://github.com/DevMortimer/pi-typesafe
+    description: 'TypeSafe AI (Jev) decisions for Pi: batched Choice/Score/Noul evaluation.'
+    ownership_basis: Unscoped npm name outside the @typesafe-ai organisation; repository is a personal account.
+  - language: typescript
+    registry: npm
+    name: '@effect-agent/ai-typesafe'
+    url: https://www.npmjs.com/package/@effect-agent/ai-typesafe
+    official: false
+    version: 0.1.0-beta.100
+    published: null
+    published_note: 'Release date not read; surfaced by npm text search rather than by a metadata fetch.'
+    repository: https://github.com/danieljvdm/effect-agent
+    description: TypeSafe AI evaluation with Effect HttpClient and request-derived answers.
+    ownership_basis: Scoped to @effect-agent, a third-party project.
+  - language: typescript
+    registry: npm
+    name: '@ai-sdk/typesafe-ai'
+    url: https://www.npmjs.com/package/@ai-sdk/typesafe-ai
+    official: false
+    version: 3.0.4
+    published: null
+    published_note: 'Release date not read; surfaced by npm text search rather than by a metadata fetch.'
+    repository: https://github.com/vercel/ai
+    description: AI SDK integration for Typesafe AI
+    ownership_basis: >-
+      Published by Vercel in the @ai-sdk scope (github.com/vercel/ai). A real, maintained provider
+      integration for the Vercel AI SDK, but Vercel's package, not TypeSafe's — an ecosystem signal,
+      not a first-party SDK.
+negative_probes:
+  - registry: pypi
+    names: [typesafe-client, system-one-adapter-python]
+    result: 404
+  - registry: pypi
+    name: typesafe-ai
+    result: 200 but NOT TypeSafe
+    note: 'PyPI `typesafe-ai` belongs to Gerome Dexheimer <hello@geromedexheimer.de> — unrelated squat/namesake. Do not wire it.'
+  - registry: pypi
+    name: typesafe
+    result: 200 but NOT TypeSafe
+    note: 'PyPI `typesafe` belongs to Krister Hedfors — a general-purpose type-checking library, unrelated.'
+  - registry: npm
+    names: [typesafe-ai, '@typesafe-ai/mcp', '@typesafe-ai/cli']
+    result: 404 on every name
+    note: 'No first-party MCP package and no CLI package. The MCP surface is remote-only (see mcp/); there is no CLI at all.'
+  - registry: nuget
+    name: TypeSafe.Sdk
+    result: 404
+  - registry: go
+    name: github.com/typesafe-ai/typesafe-sdk-go
+    result: 404
+    note: proxy.golang.org has no module — no Go SDK.
+  - registry: maven
+    result: not-probed
+    note: 'No JVM SDK is documented anywhere on docs.typesafe.ai/sdk (Python and JavaScript only), so Maven Central was not swept.'
+alternative_distribution:
+  - kind: agent-skill
+    url: https://github.com/typesafe-ai/skills
+    official: true
+    registry: github
+    version: '1.0'
+    published: '2026-09-12'
+    published_basis: 'Last push to github.com/typesafe-ai/skills; the skill frontmatter declares version "1.0". No package registry carries it, so there is no metadata endpoint to date it more precisely.'
+    install:
+      - claude plugin marketplace add typesafe-ai/skills
+      - claude plugin install typesafe@typesafe-ai
+      - npx skills add typesafe-ai/skills --skill typesafe-ai
+    note: >-
+      Distributed as a Claude Code plugin marketplace and via skills.sh, not as an npm/PyPI package.
+      Saved verbatim in skills/ — see skills/_index.yml.
+  - kind: mcp
+    url: https://docs.typesafe.ai/mcp
+    official: true
+    note: Remote, anonymous, documentation-scoped MCP server. See mcp/typesafe-ai-mcp.yml.
+  - kind: postman
+    url: https://www.postman.com/typesafe-ai
+    official: unknown
+    probed: {url: 'https://www.postman.com/typesafe-ai', status: 200}
+    note: >-
+      The handle resolves to a 200 but the body is Postman's own SPA loader shell with no workspace
+      content, so the existence of a public TypeSafe workspace could NOT be confirmed. No Postman
+      pointer is emitted on the strength of an unreadable shell.

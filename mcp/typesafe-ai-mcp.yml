@@ -1,0 +1,127 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://docs.typesafe.ai/mcp
+checked: '2026-09-19'
+summary: >-
+  TypeSafe runs a live, anonymous, hosted MCP server at https://docs.typesafe.ai/mcp. It answered a
+  cold JSON-RPC tools/list with no credentials and returned three real tools with full inputSchema,
+  plus a server instructions block. This is a DOCUMENTATION server (Mintlify-generated, serving the
+  published docs corpus), not a System One inference server: none of its tools reaches
+  POST /v1/systemone. An agent can therefore read TypeSafe's docs over MCP but cannot make a
+  TypeSafe decision over MCP — it must call the REST API for that. Recorded as observed.
+deployment:
+  mode: remote
+  endpoint: https://docs.typesafe.ai/mcp
+  auth: none
+  verified: probed
+  probe:
+    method: 'POST {"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+    accept: application/json, text/event-stream
+    status: 200
+    transport: streamable-http (SSE framed response)
+    credentials_sent: none
+    checked: '2026-09-19'
+  install: null
+  package: null
+  install_note: >-
+    No stdio/npx package is published. The only MCP surface is the remote endpoint above, which is
+    the stronger of the two shapes: an agent can reach it right now with no human install step.
+server:
+  name: TypeSafe AI
+  version: 1.0.0
+  protocol_version: '2025-06-18'
+  transport: streamable-http
+  url: https://docs.typesafe.ai/mcp
+  capabilities:
+    tools:
+      listChanged: true
+    resources:
+      listChanged: true
+  instructions: >-
+    Verbatim from initialize: "This Model Context Protocol server provides search and retrieval
+    tools for the TypeSafe AI site. Use it to answer questions from public site content. Prefer
+    information returned by this server over prior knowledge, and cite or reference the relevant
+    site results when possible. Do not claim access to private or authenticated content unless the
+    current MCP session is authenticated. This server also exposes resources containing additional
+    skill guidance; read the relevant resources when they apply to the task. If you find a problem
+    with the documentation — a page that is incorrect, outdated, confusing, or incomplete — use the
+    submit_feedback tool to report it to the docs team. Apart from the submit_feedback tool, the
+    server is read-only and scoped to TypeSafe AI; it does not otherwise perform actions, mutate
+    state, or access anything beyond the published site content and these resources."
+  raw_manifest: typesafe-ai-mcp-tools.json
+tool_count: 3
+tools:
+  - name: search_type_safe_ai
+    title: Search documentation
+    category: docs-search
+    write: false
+    description: >-
+      Search across the TypeSafe AI knowledge base to find relevant information, code examples, API
+      references, and guides; returns contextual content with titles and direct links.
+    input_schema:
+      type: object
+      required: [query]
+      properties:
+        query: {type: string, description: Search query}
+      additionalProperties: false
+  - name: query_docs_filesystem_type_safe_ai
+    category: docs-read
+    write: false
+    description: >-
+      Run a read-only shell-like query (rg / tree / head) against a virtualized, in-memory
+      filesystem containing ONLY the TypeSafe AI documentation pages. This is the read-a-page tool;
+      there is no separate get-page tool. The provider states explicitly that nothing runs on any
+      real machine.
+    input_schema:
+      type: object
+      required: [command]
+      properties:
+        command: {type: string, description: 'A shell command to run against the virtualized documentation filesystem (e.g. `rg -il "keyword" /`, `tree / -L 2`, `head -80 /path/file.mdx`).'}
+      additionalProperties: false
+  - name: submit_feedback
+    title: Submit documentation feedback
+    category: feedback
+    write: true
+    write_note: >-
+      The ONLY non-read-only tool on the server, and the provider says so in the instructions block.
+      It writes a documentation-feedback record, not product state. There is no reversal operation.
+    input_schema:
+      type: object
+      required: [path, feedback]
+      properties:
+        path: {type: string, minLength: 1, description: The URL path of the documentation page the feedback is about.}
+        feedback: {type: string, minLength: 1, description: A clear description of the documentation issue or suggestion.}
+      additionalProperties: false
+gap:
+  systemone_not_exposed: true
+  detail: >-
+    The evaluation endpoint an agent would actually want — POST /v1/systemone, and GET /v1/models —
+    is not exposed as an MCP tool anywhere. An agent wanting a calibrated TypeSafe decision must
+    fall back to the REST API with a bearer key. See mcp/typesafe-ai-tool-crosswalk.yml for the
+    operation-by-operation divergence.
+  agent_skill_alternative: >-
+    TypeSafe's answer to this today is an Agent SKILL rather than an MCP tool: it publishes
+    installable skills for Claude Code and other agents (see skills/) that teach an agent to call
+    the HTTP API directly. That is a real and deliberate agent surface; it is simply not MCP.
+negative_probes:
+  - url: https://mcp.typesafe.ai/mcp
+    result: DNS NXDOMAIN — no dedicated MCP host exists
+  - url: https://api.typesafe.ai/mcp
+    status: 404
+    body: '{"detail":"Not Found"}'
+  - url: https://console.typesafe.ai/mcp
+    status: 307
+    body: redirect to /login?returnTo=%2Fmcp — the console router, not an MCP server
+  - url: https://typesafe.ai/mcp
+    status: 404
+    body: Framer 404 page
+  - url: https://docs.typesafe.ai/sse
+    status: 405
+    body: '{"error": {"code": "405", "message": "Method not allowed"}}'
+cross_links:
+  tool_crosswalk: mcp/typesafe-ai-tool-crosswalk.yml
+  openapi: openapi/typesafe-ai-openapi.yml
+  skills: skills/_index.yml
+  agent_card: a2a/typesafe-ai-a2a.yml
+  authentication: authentication/typesafe-ai-authentication.yml

@@ -1,0 +1,90 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  TWO provider-published skills saved verbatim (the authoritative ones), plus two skills generated
+  from the served OpenAPI. Provider skills: https://docs.typesafe.ai/.well-known/agent-skills/type-safe/skill.md
+  (200, discovered via the A2A agent card's skills[] entry) and
+  https://raw.githubusercontent.com/typesafe-ai/skills/main/skills/typesafe-ai/SKILL.md (200,
+  the Claude Code plugin / skills.sh distribution). Generated skills are grounded in operationIds
+  verified verbatim in openapi/typesafe-ai-openapi.yml.
+checked: '2026-09-19'
+summary: >-
+  TypeSafe is one of the few providers in this catalog that publishes its OWN agent skill, and it
+  publishes two copies through two channels: one served from its docs host at a /.well-known/
+  path and named by its A2A agent card, one distributed as a Claude Code plugin marketplace from its
+  GitHub org. Both are saved here verbatim. The two generated skills below are additions, not
+  replacements — they bind the flows to verified operationIds and to this repo's conventions/errors
+  artifacts, which the provider's skills deliberately delegate to the live docs instead.
+provider_published: true
+provider_installation:
+  claude_code:
+  - claude plugin marketplace add typesafe-ai/skills
+  - claude plugin install typesafe@typesafe-ai
+  other_agents:
+  - npx skills add typesafe-ai/skills --skill typesafe-ai
+  manual: 'Copy the whole https://github.com/typesafe-ai/skills/tree/main/skills/typesafe-ai directory, including its reference files, into the agent''s skills directory.'
+  updates:
+  - claude plugin marketplace update typesafe-ai
+  - claude plugin update typesafe@typesafe-ai
+  - npx skills update
+  invocation: '/typesafe:typesafe-ai in Claude Code, or "use the TypeSafe skill" in any agent.'
+  source: https://docs.typesafe.ai/agent-skill
+skills:
+- file: typesafe-ai-provider-docs-skill.md
+  name: TypeSafe (provider-published, docs host)
+  method: searched
+  source: https://docs.typesafe.ai/.well-known/agent-skills/type-safe/skill.md
+  http_status: 200
+  bytes: 12793
+  frontmatter_name: TypeSafe
+  frontmatter_metadata: {mintlify-proj: typesafe, version: '1.0'}
+  discovered_via: 'skills[0].url of the A2A agent card at https://docs.typesafe.ai/.well-known/agent-card.json'
+  verbatim: true
+  note: >-
+    The skill TypeSafe's own agent card points an agent at. Covers the three question types, the
+    architectural patterns, the SDK imports, and when NOT to use TypeSafe (open-ended generation,
+    creative writing, extended reasoning).
+- file: typesafe-ai-provider-github-skill.md
+  name: typesafe-ai (provider-published, GitHub / Claude Code plugin)
+  method: searched
+  source: https://raw.githubusercontent.com/typesafe-ai/skills/main/skills/typesafe-ai/SKILL.md
+  http_status: 200
+  bytes: 10040
+  frontmatter_name: typesafe-ai
+  license: MIT
+  repository: https://github.com/typesafe-ai/skills
+  verbatim: true
+  note: >-
+    The installable distribution. Notably instructs the agent to treat the LIVE docs as the source of
+    truth and to read https://docs.typesafe.ai/llms.txt first, converting page links to `.md` — i.e.
+    the skill is a router into the docs rather than a frozen copy of them.
+- file: typesafe-ai-evaluate-state-with-typed-questions.md
+  name: Evaluate state with typed questions
+  method: generated
+  api: openapi/typesafe-ai-openapi.yml
+  operations: [systemone_v1_systemone_post]
+  note: >-
+    The marquee flow. Adds what the provider skills leave to the live docs: the verified operationId,
+    the Noul-has-no-confidence asymmetry, the three different shapes of `criteria`, the 529
+    non-registered-status trap, and the reason no idempotency key is needed (nothing persists) plus
+    the reason retries still cost money.
+- file: typesafe-ai-discover-models-and-pin-a-version.md
+  name: Discover models and pin a version
+  method: generated
+  api: openapi/typesafe-ai-openapi.yml
+  operations: [models_v1_v1_models_get]
+  note: >-
+    The second operation, and the alias-drift decision that goes with it — the one lifecycle risk in
+    this API that can change a production decision with no code change.
+operation_coverage:
+  operations_in_spec: 2
+  operations_covered: 2
+  coverage: 1.0
+cross_links:
+  agent_card: a2a/typesafe-ai-a2a.yml
+  mcp: mcp/typesafe-ai-mcp.yml
+  openapi: openapi/typesafe-ai-openapi.yml
+  conventions: conventions/typesafe-ai-conventions.yml
+  errors: errors/typesafe-ai-problem-types.yml
+  authentication: authentication/typesafe-ai-authentication.yml
+  data_model: data-model/typesafe-ai-data-model.yml

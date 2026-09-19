@@ -1,0 +1,203 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  https://docs.typesafe.ai/api, https://docs.typesafe.ai/models, https://docs.typesafe.ai/confidence,
+  https://docs.typesafe.ai/introduction/quickstart, https://docs.typesafe.ai/sdk/python/api/retries
+  and the served OpenAPI (openapi/typesafe-ai-openapi.yml).
+checked: '2026-09-19'
+summary: >-
+  A two-operation, stateless, single-tenant-key API. There is nothing to paginate, nothing to
+  expand, nothing to create and nothing to undo: POST /v1/systemone is a pure function over a
+  request body, and GET /v1/models returns a short list. That shape is why several of the
+  cross-cutting dimensions below are honestly `na` rather than zero — the mechanisms they measure
+  have no surface to apply to.
+authentication:
+  style: bearer_api_key
+  header: Authorization
+  format: 'Bearer <API_KEY>'
+  see: authentication/typesafe-ai-authentication.yml
+versioning:
+  api: path-segment
+  api_detail: 'Both operations live under /v1/. No date-based or header-based version is documented.'
+  spec_version: 0.2.0
+  spec_version_note: 'info.version in the served OpenAPI. It is not the /v1 path version and it is not a model version.'
+  model: alias-and-pin
+  model_detail: >-
+    The `model` request field selects behaviour, and this is where the real versioning lives. Two
+    aliases are published — `jev-latest` (most recent stable; the SDK default and the docs default)
+    and `jev-preview` (most recent release, official or not; currently the same build). A versioned
+    ID such as `jev-1.13.0` can be sent whether or not it appears in GET /v1/models. The RESPONSE
+    carries back the versioned ID that answered, so a caller can log which build produced each
+    result.
+  pinning_guidance_published: true
+  pinning_quote: >-
+    "If you have tuned confidence thresholds against a specific version, pin that version's ID
+    instead of the alias and move to the new one on your own schedule."
+  see: lifecycle/typesafe-ai-lifecycle.yml
+request_shape:
+  content_type: application/json
+  required_fields: [state, model, questions]
+  state: 'string | object | array — the content to evaluate.'
+  questions: 'map<string, Question>; the caller chooses every key and the answer comes back under the same key.'
+  key_semantics: >-
+    Documented explicitly: "The key is not sent to the underlying model and is not used in
+    inference." A caller-chosen id is a correlation handle, not a prompt.
+  question_types: [noul, choice, score]
+response_shape:
+  fields: [model, answers, usage]
+  answers: 'map<string, Answer>, keyed by the caller''s question ids; each Answer carries a `type` matching its question.'
+  usage: '{input_tokens, output_tokens}'
+  confidence: >-
+    Choice and Score answers carry `confidence` (0–1) derived from the probability distribution;
+    Noul answers do not — a Noul returns the probability itself as `noul`. This asymmetry matters to
+    a caller writing one threshold helper for all three types.
+pagination:
+  style: none
+  applicable: false
+  note: >-
+    Neither operation returns a collection that can exceed one response. GET /v1/models returns the
+    full list; POST /v1/systemone returns exactly one answer per question the caller sent. The
+    caller controls response size by controlling how many questions it asks.
+batching:
+  supported: true
+  mechanism: >-
+    The questions map IS the batch primitive. Jev ingests `state` once and evaluates every question
+    against it in parallel, which is the documented way to make many decisions in one round trip
+    ("speculative fan-out"). TypeSafe's own cookbook measures a 13-question briefing as 12.2x
+    cheaper and 10.0x faster batched than issued one question at a time, with no change in answers.
+  limits:
+    context_total: 64k tokens per request (state plus all questions combined)
+    context_single: 32k tokens (state plus the single longest question)
+  source: https://docs.typesafe.ai/models
+field_expansion:
+  supported: false
+  note: No sparse-fieldset or expand parameter; the response shape is fixed by the question types sent.
+metadata:
+  customer_metadata_field: false
+  note: >-
+    There is no request-level `metadata` passthrough. The caller's own question ids are the only
+    correlation mechanism the API preserves, and they are echoed back in `answers`.
+request_tracing:
+  request_id_header: not-documented
+  observed: not-observed
+  note: >-
+    No request-id / correlation header is documented, and none could be observed: an unauthenticated
+    request to api.typesafe.ai returns a bare {"detail":"Not Found"} 404 with no tracing headers to
+    read. A caller has no provider-side identifier to quote to support. The `model` field in the
+    response is the only server-supplied fact about the call.
+idempotency:
+  coverage: na
+  documented: false
+  header: null
+  scope: []
+  reason: >-
+    NA, not zero. There is no mutating surface to protect. POST /v1/systemone is an HTTP POST
+    because it carries a body, not because it creates a resource: it returns a computed answer and
+    persists nothing a caller can later read, update or delete. GET /v1/models is a read. Replaying
+    a systemone call is therefore safe in the correctness sense — the only consequence of a
+    duplicate is a duplicate charge, and it is the caller's cost, not the caller's data, that a
+    replay damages.
+  billing_caveat: >-
+    That caveat is real and worth stating plainly: input tokens are billed (output tokens are free),
+    so a retry loop with no ceiling is a spend bug even though it is not a data bug. Both official
+    SDKs ship a RetryPolicy with bounded attempts and backoff by default, which is the mitigation
+    TypeSafe actually offers in place of an idempotency key.
+  agent_risk: low
+  agent_risk_note: >-
+    An agent that times out and retries POST /v1/systemone cannot corrupt state, double-charge a
+    customer, or send a duplicate message. It can only re-pay for the same evaluation.
+  no_pointer_note: >-
+    No `Idempotency` pointer is emitted in apis.yml. An idempotency-key mechanism on a stateless
+    evaluation endpoint would be ceremony, so its absence is correct design rather than a gap — but
+    it is recorded as `na` so the band gate reads a genuine not-applicable and not a silent zero.
+dry_run_mode:
+  supported: na
+  reason: >-
+    Nothing to rehearse. Every call is already a read-only computation whose only side effect is the
+    charge for it. A dry-run flag would have nothing to suppress.
+reversibility:
+  applicable: na
+  grade: na
+  reason: >-
+    The API has NO write surface. Neither operation creates, mutates or deletes anything on
+    TypeSafe's side, so there is no action for a caller or an agent to take back. Recorded as `na`
+    rather than 0 so the reversibility dimension leaves the denominator instead of penalising an
+    API that has nothing to reverse.
+  write_surfaces: []
+  reversal_operations: []
+  adjacent_write_surface:
+    tool: submit_feedback
+    surface: 'MCP server, https://docs.typesafe.ai/mcp'
+    reversible: false
+    window: null
+    note: >-
+      The one write TypeSafe exposes anywhere is the MCP documentation-feedback tool, and it has no
+      reversal operation and no stated window. It writes a docs-team record, not customer or product
+      state, so an agent calling it twice creates two feedback items and nothing worse. Recorded for
+      completeness — NOT graded, because it is not part of the API contract.
+  verified: false
+  verified_note: 'No window is asserted anywhere in this block, because the docs state none.'
+error_envelope:
+  media_type: application/json
+  rfc9457: false
+  shape: >-
+    FastAPI-style. Validation failures return HTTPValidationError — {"detail": [ValidationError...]}
+    where each entry carries loc[], msg, type and optionally input and ctx. The published error
+    table gives plain HTTP status meanings for 401/422/429/529 without a documented body shape for
+    the non-422 cases.
+  see: errors/typesafe-ai-problem-types.yml
+rate_limit_signaling:
+  status_on_exhaustion: 429
+  overload_status: 529
+  overload_note: >-
+    529 Overloaded is non-standard and worth flagging to a client author: it is outside the IANA
+    registry, so an HTTP library that switches on known status codes will fall through to a generic
+    5xx branch. TypeSafe documents it as retryable with backoff, same as 429.
+  retry_after: conditional
+  retry_after_note: >-
+    The docs say the SDKs "honor the `retry-after` header when the response carries one" — so the
+    header is sometimes present and is not guaranteed. A direct HTTP caller must handle both cases.
+  documented_limits:
+    tokens_per_second: 250000
+    requests_per_minute: 1200
+  volatility_warning: >-
+    TypeSafe explicitly warns the published limits "can change without notice" while it scales. See
+    rate-limits/typesafe-ai-rate-limits.yml.
+  see: rate-limits/typesafe-ai-rate-limits.yml
+retries:
+  sdk_default: true
+  mechanism: 'RetryPolicy — configurable attempt count, retryable statuses, backoff, retry-header handling.'
+  direct_http_guidance: 'Exponential backoff on 429 and 529 rather than immediate retry.'
+  source: https://docs.typesafe.ai/sdk/python/api/retries
+event_surface:
+  webhooks: false
+  streaming: false
+  asyncapi: false
+  note: >-
+    No webhooks, no server-sent events, no streaming responses, no event catalog, and no AsyncAPI.
+    The published A2A agent card confirms it from the provider's own side: capabilities.streaming is
+    false and capabilities.pushNotifications is false. No asyncapi/ artifact is written and no
+    AsyncAPI or Webhooks pointer is emitted — this is a request/response API with no event surface,
+    which is not-applicable rather than missing.
+determinism:
+  self_consistency_documented: true
+  note: >-
+    Unusually for an inference API, TypeSafe publishes cookbooks on measuring its own
+    self-consistency across repeated calls (consistency_noul_cookbook,
+    consistency_choice_cookbook) and a per-version "jaggedness" page listing known weak spots for
+    jev-1.13. Relevant to conventions because it is the provider telling a caller how much to trust
+    a repeated result — the closest thing this API has to a documented consistency guarantee.
+  see: lifecycle/typesafe-ai-lifecycle.yml
+input_constraints:
+  modalities: [text]
+  modality_note: 'Text only — string, JSON object, or array of text values. No image, audio, video or binary input.'
+  language: 'Natural-language text; English is the primary training language and where accuracy is best. Other languages including CJK are handled but not equally well.'
+cross_links:
+  authentication: authentication/typesafe-ai-authentication.yml
+  errors: errors/typesafe-ai-problem-types.yml
+  lifecycle: lifecycle/typesafe-ai-lifecycle.yml
+  rate_limits: rate-limits/typesafe-ai-rate-limits.yml
+  plans: plans/typesafe-ai-plans-pricing.yml
+  data_model: data-model/typesafe-ai-data-model.yml
+  examples: examples/typesafe-ai-examples.yml
+  mcp: mcp/typesafe-ai-mcp.yml

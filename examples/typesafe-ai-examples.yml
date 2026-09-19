@@ -1,0 +1,144 @@
+generated: '2026-09-19'
+method: derived
+source: >-
+  openapi/typesafe-ai-openapi.yml (field-level `examples` on all 16 components.schemas, captured live
+  from https://api.typesafe.ai/openapi.json) plus the worked request/response pairs published at
+  https://docs.typesafe.ai/api and https://docs.typesafe.ai/introduction/quickstart.
+checked: '2026-09-19'
+summary: >-
+  Unusually well exampled for a two-operation spec. Every schema in the served OpenAPI carries
+  field-level examples — 40 example values in total — and they are coherent with each other: the same
+  duplicate-charge support ticket runs through the request, the Noul answer and the usage block, so a
+  client generator or an agent gets a complete, valid, realistic call out of the spec alone without
+  reading the docs.
+in_spec:
+  examples_present: true
+  style: 'JSON Schema 2020-12 field-level `examples` arrays (OpenAPI 3.1 dialect). No operation-level `examples` or requestBody media-type examples.'
+  example_value_count: 40
+  schemas_with_examples: 14
+  schemas_total: 16
+  schemas_without_examples: [Answer, Question]
+  schemas_without_examples_note: 'Both are pure unions (anyOf over the variants), so the variants carry the examples instead. Correct, not a gap.'
+  operation_level_examples: false
+  operation_level_note: >-
+    The examples live on the schemas rather than on the operations, so a tool that only reads
+    requestBody.content["application/json"].examples will find none while the same information is
+    present one level down. Recorded because it changes which tooling surfaces them.
+end_to_end_pair:
+  note: 'Assembled from the spec''s own field examples — nothing invented.'
+  request:
+    state: 'I was charged twice. Please help.'
+    model: jev-latest
+    questions:
+      billing:
+        type: noul
+        instructions: Is this message about billing?
+  response:
+    model: jev-latest
+    answers:
+      billing:
+        type: noul
+        noul: 0.98
+    usage:
+      input_tokens: 120
+      output_tokens: 12
+  source: 'openapi/typesafe-ai-openapi.yml — SystemOneRequest.state/model/questions and SystemOneResponse.model/answers/usage examples.'
+by_schema:
+- schema: SystemOneRequest
+  examples:
+    state: ['I was charged twice. Please help.', {subject: Duplicate charge, message: Please help.}]
+    model: [jev-latest]
+    questions: [{billing: {type: noul, instructions: 'Is this message about billing?'}}]
+  note: 'Two `state` examples deliberately show both accepted shapes — a plain string and a structured object.'
+- schema: SystemOneResponse
+  examples:
+    model: [jev-latest]
+    answers: [{billing: {type: noul, noul: 0.98}}]
+    usage: [{input_tokens: 120, output_tokens: 12}]
+- schema: NoulQuestion
+  examples:
+    type: [noul]
+    instructions: ['Is this message spam?', 'This message contains unsolicited advertising.', {task: Identify unsolicited advertising.}]
+    criteria: [{'true': Unsolicited advertising, 'false': A legitimate conversation}]
+  note: >-
+    Three `instructions` examples covering all three accepted forms — an interrogative string, a
+    declarative statement, and a JSON object. This is the clearest published demonstration that a
+    Noul accepts a statement to evaluate as well as a question to answer.
+- schema: NoulAnswer
+  examples: {type: [noul], noul: [0.98]}
+- schema: NoulCriteria
+  examples:
+    'true': ['The message is unsolicited advertising.']
+    'false': ['The message is a legitimate conversation.']
+- schema: ChoiceQuestion
+  examples:
+    type: [choice]
+    instructions: ['What is the tone of this message?']
+    criteria: [{angry: An upset or hostile message, calm: A neutral or polite message, excited: An enthusiastic or eager message}]
+- schema: ChoiceAnswer
+  examples:
+    type: [choice]
+    choice: [angry]
+    confidence: [0.9]
+    probabilities: [{angry: 0.8, calm: 0.1, excited: 0.1}]
+  note: 'The probabilities example sums to 1.0, matching the documented contract.'
+- schema: ScoreQuestion
+  examples:
+    type: [score]
+    instructions: ['How urgent is this message?']
+    criteria: [['Can wait', 'Needs attention this week', 'Needs attention today']]
+  note: 'The array-of-levels example reflects the post-2026-09-15 shape (ordered sequence, not an integer-keyed dict).'
+- schema: ScoreAnswer
+  examples:
+    type: [score]
+    score: [1.7]
+    confidence: [0.9]
+    legend: [{'0': Can wait, '1': Needs attention this week, '2': Needs attention today}]
+    probabilities: [{'0': 0.1, '1': 0.1, '2': 0.8}]
+  note: >-
+    score 1.7 against levels 0/1/2 demonstrates the documented behaviour that a Score can land
+    BETWEEN levels — the single most easily misread field in this API.
+- schema: Usage
+  examples: {input_tokens: [120], output_tokens: [12]}
+- schema: ModelMetadata
+  examples:
+    name: [jev-latest]
+    description: ['General-purpose system one model.']
+    release_date: ['2026-09-15']
+- schema: ModelMetadataList
+  examples:
+    models: [[{name: jev-latest, description: 'General-purpose system one model.', release_date: '2026-09-15'}]]
+- schema: HTTPValidationError
+  examples:
+    detail: [[{loc: [body, state], msg: Field required, type: missing}]]
+- schema: ValidationError
+  examples:
+    loc: [[body, questions, urgency, score, criteria]]
+    msg: [Field required]
+    type: [missing]
+    input: [{type: score}]
+    ctx: [{min_length: 1}]
+  note: >-
+    The most useful error example in the set: it shows a Score question rejected for having fewer
+    than the required two criteria levels, including the ctx.min_length constraint.
+docs_examples:
+  note: 'The documentation adds runnable examples the spec does not carry. Catalogued, not copied.'
+  surfaces:
+  - {url: 'https://docs.typesafe.ai/api', content: 'Per-question-type request bodies and per-answer-type response bodies, with focus-line highlighting.'}
+  - {url: 'https://docs.typesafe.ai/introduction/quickstart', content: 'Complete runnable cURL command against POST /v1/systemone, plus a mixed Noul+Choice+Score request.'}
+  - {url: 'https://docs.typesafe.ai/models', content: 'cURL, Python and JavaScript for GET /v1/models.'}
+  - {url: 'https://docs.typesafe.ai/sdk/python', content: 'Async and sync client quickstarts with typed Choice/Noul/Score objects.'}
+  - {url: 'https://docs.typesafe.ai/sdk/javascript', content: 'TypeScript quickstart with the choice() helper.'}
+  - {url: 'https://docs.typesafe.ai/cookbooks', content: '18 worked cookbooks, each a complete measured use case (re-ranking, guardrails, citation checking, hierarchical classification, entity alignment, date extraction, and more).'}
+  cookbook_count: 18
+  cookbook_note: >-
+    The cookbooks are the richest example surface TypeSafe publishes and several carry measured
+    outcomes rather than illustrative code — e.g. the re-ranking cookbook reports top-1 accuracy
+    rising from 5% to 18% across 40 CLERC legal queries, and the parallel-questions cookbook reports
+    12.2x lower cost and 10.0x lower latency from batching. Claims are the provider's; recorded as
+    published, not verified here.
+cross_links:
+  openapi: openapi/typesafe-ai-openapi.yml
+  data_model: data-model/typesafe-ai-data-model.yml
+  errors: errors/typesafe-ai-problem-types.yml
+  skills: skills/_index.yml

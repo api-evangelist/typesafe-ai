@@ -1,0 +1,207 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  Artifacts harvested this run (well-known/typesafe-ai-security.txt,
+  security/typesafe-ai-trust-center.yml, lifecycle/typesafe-ai-lifecycle.yml) plus the provider's
+  published legal documents — https://typesafe.ai/legal/data-processing, /legal/mca,
+  /legal/privacy-policy, /legal/terms — and https://docs.typesafe.ai/legal,
+  https://docs.typesafe.ai/models and https://docs.typesafe.ai/model-jaggedness/jev-1.13.
+checked: '2026-09-19'
+harvest_only: true
+harvest_only_note: >-
+  This file records WHAT TypeSafe publishes. It does not decide which regimes reach the company —
+  that is the Kin Score regime map's job, not this artifact's.
+summary: >-
+  For an early-access AI lab, an unusually complete horizontal posture: a full DPA with EU SCCs and
+  the UK Addendum, a 72-hour incident-notification commitment, a named subprocessor-list location, a
+  US data-residency statement, a published no-training-on-customer-data commitment, zero data
+  retention offered to enterprise, and a per-version model-limitations page. What is absent is the
+  accessibility and supply-chain half: no VPAT or accessibility conformance report, no SBOM, no
+  transparency report, no support-lifetime commitment, and no Global Privacy Control statement.
+signals:
+  incident_notification:
+    present: true
+    pointer_type: IncidentNotification
+    url: https://typesafe.ai/legal/data-processing
+    stated_sla: 'without undue delay and in any case within 72 hours after becoming aware'
+    stated_sla_verbatim: >-
+      "Typesafe will notify Customer without undue delay and in any case within 72 hours after
+      becoming aware of any accidental or unauthorized access to, or disclosure or use of, Customer
+      Personal Data ('Security Incident')."
+    location: 'Data Processing Agreement §5.2 (Security Incident)'
+    scope: Customer Personal Data processed on the customer's behalf
+    probed: {url: 'https://typesafe.ai/legal/data-processing', status: 200}
+    substance_basis: 'A contractual notification window with a stated number, not a marketing mention of "security".'
+  subprocessors:
+    present: true
+    pointer_type: Subprocessors
+    url: https://trust.typesafe.ai/subprocessors
+    named_by: 'Data Processing Agreement §3.1 (Authorization)'
+    named_by_verbatim: >-
+      "Customer provides general authorization for Typesafe to engage the following subprocessors as
+      described in https://trust.typesafe.ai/subprocessors"
+    obligations_published: true
+    obligations_note: >-
+      The DPA commits TypeSafe to a contractual agreement with each subprocessor imposing equivalent
+      data-protection obligations, and to work in good faith to address a customer objection to a new
+      subprocessor.
+    list_readable: false
+    list_readable_note: >-
+      HONEST CAVEAT: the URL returns 200 but serves the Vanta trust-center SPA shell (the same 6,914
+      bytes as every other path on that host), so the subprocessor TABLE itself was not observed and
+      no vendor names or dates are recorded here. The DPA clause is the substance; the list is not
+      machine-readable. Recorded as present because the provider contractually publishes the list at
+      a named location, NOT because a table was seen.
+    probed:
+    - {url: 'https://trust.typesafe.ai/subprocessors', status: 200, observed: 'Vanta SPA shell, 6914 bytes'}
+    - {url: 'https://typesafe.ai/legal/subprocessors', status: 404}
+  data_residency:
+    present: true
+    pointer_type: DataResidency
+    url: https://typesafe.ai/legal/privacy-policy
+    stated_region: United States
+    stated_verbatim: >-
+      "The Services are hosted in the United States ('U.S.'). If you choose to use the Services from
+      the EEA, the UK or other regions of the world with laws governing data collection and use that
+      may differ from U.S. law..."
+    transfer_mechanisms:
+    - EU Standard Contractual Clauses (European Commission Implementing Decision 2021/914, 4 June 2021)
+    - UK International Data Transfer Addendum to the EU SCCs (ICO Version B1.0, in force 21 March 2022)
+    transfer_source: 'Data Processing Agreement §6 (International Data Transfers)'
+    region_choice_available: false
+    region_choice_note: >-
+      No customer-selectable region, no EU-hosted option and no residency commitment beyond "hosted
+      in the U.S." is documented anywhere.
+    probed: {url: 'https://typesafe.ai/legal/privacy-policy', status: 200}
+  ai_transparency:
+    present: true
+    pointer_type: AITransparency
+    urls:
+    - https://docs.typesafe.ai/models
+    - https://docs.typesafe.ai/model-jaggedness/jev-1.13
+    - https://docs.typesafe.ai/introduction/machine-learning-primer
+    substance:
+    - 'Named, versioned model with published aliases and an explicit statement that an alias can move under a caller without notice.'
+    - 'A per-version known-limitations page: "Jev isn''t perfect. Here are some jagged edges we are aware of with jev-1.13."'
+    - 'Published modality and language limits — text only; English primary, other languages including CJK "handled but not equally well; test on your own content".'
+    - 'Published training-method disclosure — Reinforcement Learning for Calibrated Decisions (RLCD) rather than RLHF, with a primer page explaining why.'
+    - 'Published statement that the model is not fine-tuned or LoRA-adapted with customer data and that the same weights serve every account.'
+    probed:
+    - {url: 'https://docs.typesafe.ai/models', status: 200}
+    - {url: 'https://docs.typesafe.ai/model-jaggedness/jev-1.13', status: 200}
+    substance_basis: >-
+      A dated, version-scoped limitations document plus published modality/language constraints — not
+      a page that merely uses the word "responsible".
+  training_data_summary:
+    present: partial
+    pointer_type: TrainingDataSummary
+    url: https://docs.typesafe.ai/models
+    what_is_published:
+    - 'The negative commitment: "Jev is not trained on customer requests or responses."'
+    - 'The training method: RLCD, described at https://docs.typesafe.ai/introduction/machine-learning-primer.'
+    - 'That no per-account weights exist — the same weights serve every account.'
+    what_is_absent:
+    - 'Any description of the training CORPUS — sources, licensing, provenance, cut-off date, scale.'
+    - 'Any EU AI Act Article 53-style public summary of training content.'
+    verdict: >-
+      Recorded as PARTIAL, not present. TypeSafe publishes what it does NOT train on, which is the
+      commercially important half for a customer, and nothing about what it DOES train on. No
+      TrainingDataSummary pointer is emitted on that basis — a no-training-on-your-data promise is a
+      data-handling commitment, not a training-data summary.
+  data_subject_request:
+    present: partial
+    pointer_type: DataSubjectRequest
+    url: https://typesafe.ai/legal/privacy-policy
+    mechanism: email
+    contact: privacy@typesafe.ai
+    processor_route: 'DPA §4.1 — TypeSafe promptly forwards any data-subject or consumer request it receives to the Customer, who is the controller.'
+    controller_route: 'Privacy Policy "Your Choices" section — marketing unsubscribe, retention/deletion on request. No self-service portal, no request form, no stated response window.'
+    verdict: >-
+      Recorded as PARTIAL. There is a real route (a named privacy address and a contractual
+      forwarding obligation) but no published request mechanism, no stated turnaround, and no portal.
+      No DataSubjectRequest pointer is emitted for an email address alone.
+    probed: {url: 'https://typesafe.ai/privacy/requests', status: 404}
+  data_retention:
+    present: true
+    urls:
+    - https://typesafe.ai/legal/privacy-policy
+    - https://docs.typesafe.ai/legal
+    stated_period: 'as long as reasonably necessary to provide you with the Services, or otherwise in support of our business or commercial purposes'
+    stated_period_note: 'VERBATIM. Not normalised to a number — the provider states no number, and inventing one would invent a commitment.'
+    zero_data_retention:
+      offered: true
+      audience: enterprise customers
+      contact: privacy@typesafe.ai
+      verbatim: 'We also offer zero data retention (ZDR) for enterprise customers.'
+      source: https://docs.typesafe.ai/legal
+      note: 'ZDR is an enterprise option, not the default. No default retention period for API request/response content is published.'
+  global_privacy_control:
+    present: false
+    honored: null
+    honored_note: >-
+      DELIBERATELY NULL, not false. No GPC statement is published either way. The Privacy Policy
+      addresses only Do Not Track — "There is no accepted standard on how to respond to 'Do Not
+      Track' signals, and we do not respond to such signals" — which is a different signal and is NOT
+      evidence about GPC. Per the pipeline rule, `honored` is set only from a published statement and
+      never by sending a Sec-GPC header, so it stays unset.
+  accessibility_conformance:
+    present: false
+    probed:
+    - {url: 'https://typesafe.ai/accessibility', status: 404}
+    - {url: 'https://typesafe.ai/accessibility/vpat', status: 404}
+    note: 'No VPAT, no WCAG conformance statement, no accessibility page. Nothing in the sitemap.'
+  sbom:
+    present: false
+    probed: [{url: 'https://typesafe.ai/security/sbom', status: 404}]
+    note: >-
+      No SBOM in any format, and none is derived — a bill of materials asserts what is inside a build
+      nobody here has seen, so this signal is search-only by rule.
+  support_lifetime:
+    present: false
+    note: >-
+      No support window, LTS designation or minimum version-support period for the API or either SDK.
+      The versioning page says an alias moves when a new release ships and offers pinning as the
+      caller's own mitigation, which is guidance rather than a commitment. See lifecycle/.
+  transparency_report:
+    present: false
+    probed: [{url: 'https://typesafe.ai/transparency', status: 404}]
+  notice_and_action:
+    present: false
+    probed: [{url: 'https://typesafe.ai/legal/report-content', status: 404}]
+    note: >-
+      No content-reporting or notice-and-action mechanism. The Master Customer Agreement carries an
+      acceptable-use restriction list and a unilateral suspension right, which is enforcement, not a
+      notice-and-action channel for third parties.
+  age_assurance:
+    present: false
+    note: >-
+      The Privacy Policy carries only the standard "Services are not directed to children" clause
+      with a report address (privacy@typesafe.ai). That is a disclaimer, not an age-assurance
+      mechanism, so no signal is recorded.
+  exit_assistance:
+    present: false
+    note: >-
+      No transition-assistance or data-export clause located in the Master Customer Agreement. Low
+      stakes here: the API persists no customer data, so there is materially nothing to export.
+  privacy_framework_terms:
+    present: true
+    regimes_named_by_provider:
+    - {regime: GDPR, evidence: 'DPA references Regulation (EU) 2016/679 and incorporates the EU SCCs (Implementing Decision 2021/914).'}
+    - {regime: UK GDPR, evidence: 'DPA incorporates the ICO International Data Transfer Addendum, Version B1.0.'}
+    - {regime: CCPA, evidence: 'DPA §2.2 carries explicit no-sell / no-share and purpose-limitation undertakings, naming the California Consumer Privacy Act.'}
+    note: >-
+      Recorded as the provider's OWN naming of regimes in its contracts. It is not a determination
+      that any regime applies — that is the regime map's decision.
+documents:
+- {name: Data Processing Agreement, url: 'https://typesafe.ai/legal/data-processing', status: 200}
+- {name: Master Customer Agreement, url: 'https://typesafe.ai/legal/mca', status: 200}
+- {name: Privacy Policy, url: 'https://typesafe.ai/legal/privacy-policy', status: 200}
+- {name: Terms of Use, url: 'https://typesafe.ai/legal/terms', status: 200}
+- {name: Legal index (docs), url: 'https://docs.typesafe.ai/legal', status: 200}
+- {name: Trust center, url: 'https://trust.typesafe.ai/', status: 200, readable: false}
+cross_links:
+  trust_center: security/typesafe-ai-trust-center.yml
+  vulnerability_disclosure: security/typesafe-ai-vulnerability-disclosure.yml
+  conformance: conformance/typesafe-ai-conformance.yml
+  lifecycle: lifecycle/typesafe-ai-lifecycle.yml
+  well_known: well-known/typesafe-ai-well-known.yml

@@ -1,0 +1,144 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  https://status.typesafe.ai/, https://docs.typesafe.ai/models,
+  https://docs.typesafe.ai/model-jaggedness/jev-1.13, https://docs.typesafe.ai/sdk/python/changelog,
+  https://docs.typesafe.ai/sdk/javascript/changelog and https://typesafe.ai/legal/mca.
+checked: '2026-09-19'
+summary: >-
+  An early-access API with a real operational surface and no lifecycle policy. There is a public
+  status page with 90 days of per-day history, dated SDK changelogs, a published model-alias scheme
+  with explicit pinning guidance, and a per-version known-limitations page — but no deprecation
+  policy, no Sunset/Deprecation headers, no SLA, no support window, and no roadmap. The model alias
+  IS the lifecycle mechanism, and TypeSafe says out loud that an alias can move under a caller.
+versioning:
+  scheme: path-segment-plus-model-alias
+  api_path: /v1/
+  api_path_note: 'Both operations are under /v1/. No second version has ever been published, so no migration precedent exists.'
+  spec_version: 0.2.0
+  spec_version_note: 'info.version of the served OpenAPI. Below 1.0 — an explicit pre-stable signal.'
+  model_versions:
+    current: jev-1.13.0
+    aliases:
+    - {alias: jev-latest, points_to: jev-1.13.0, meaning: 'Most recent stable, official release. The SDK default and the docs default.'}
+    - {alias: jev-preview, points_to: jev-1.13.0, meaning: 'Most recent release, official or not. Moves ahead of jev-latest when a preview build exists; currently identical.'}
+    pinning_supported: true
+    pinning_note: >-
+      A versioned ID is accepted in the `model` field whether or not GET /v1/models lists it, and the
+      response reports the versioned ID that answered. So a caller can pin, and can audit after the
+      fact which build produced a result.
+    alias_drift_warning_verbatim: >-
+      "An alias moves when a new release ships, so the answers behind it can change without a change
+      on your side. ... If you have tuned confidence thresholds against a specific version, pin that
+      version's ID instead of the alias and move to the new one on your own schedule."
+    implication: >-
+      This is the substantive lifecycle risk in this API and the provider documents it honestly. A
+      caller whose business logic thresholds on `confidence` is coupled to a model build, and the
+      default (`jev-latest`) is the moving one. There is no published notice period for an alias move.
+  source: https://docs.typesafe.ai/models
+model_transparency:
+  jaggedness_page:
+    url: https://docs.typesafe.ai/model-jaggedness/jev-1.13
+    status: 200
+    purpose: >-
+      Per-version list of known weak spots — "Jev isn't perfect. Here are some jagged edges we are
+      aware of with jev-1.13. Many of these will be fixed in later versions."
+    note: >-
+      A published, version-scoped limitations document is rare and is the closest thing TypeSafe has
+      to release notes for the model itself. Recorded under lifecycle because it is versioned and it
+      is where a caller learns what changed in practice.
+  self_consistency_cookbooks:
+  - https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook
+  - https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook
+status_page:
+  url: https://status.typesafe.ai/
+  provider: Better Stack
+  provider_evidence: 'Page <title> carries "Better Stack".'
+  probed: {url: 'https://status.typesafe.ai/', status: 200}
+  monitored_services:
+  - {name: TypeSafe API, host: api.typesafe.ai, state_at_check: Operational}
+  availability_published: true
+  uptime_observed: 99.853%
+  uptime_window: rolling 90-day per-day history shown on the page
+  uptime_note: >-
+    The page shows dated per-day downtime for the whole window (for example "Down for 20 minutes" on
+    2026-07-09 and 18 minutes on 2026-07-10), which is a more candid operational record than a
+    green/red badge. Read 2026-09-19 at 12:20 UTC; "All services are online".
+  machine_readable_api: false
+  machine_readable_note: >-
+    Better Stack, not Atlassian Statuspage — /api/v2/status.json and /history.rss both 301 rather
+    than returning JSON/RSS. An Atom feed IS served at https://status.typesafe.ai/feed.xml
+    (200, application/xml), which is the only machine-readable incident channel available.
+  feeds:
+    atom: https://status.typesafe.ai/feed.xml
+    atom_status: 200
+    rss: null
+    json: null
+  subscribe_note: 'The Atom feed is the one an agent or a monitor can actually consume.'
+deprecation:
+  policy_documented: false
+  deprecated_operations: []
+  sunset_header: false
+  rfc8594: false
+  notes: >-
+    No deprecation or sunset policy is published anywhere — not in the docs, not in the Master
+    Customer Agreement, not on the models page. Neither operation in the served OpenAPI carries
+    `deprecated: true`, and no model version has been retired yet (jev-1.13.0 is the only versioned
+    build published). No `Deprecation` pointer is emitted: this is a genuine absence, not a missing
+    pointer. The alias-drift warning above is the nearest published statement, and it describes
+    silent behavioural change rather than an orderly retirement.
+  probes:
+  - {url: 'https://docs.typesafe.ai/changelog', status: 404}
+  - {url: 'https://typesafe.ai/roadmap', status: 404}
+sla:
+  documented: false
+  uptime_commitment: null
+  support_response_commitment: null
+  notes: >-
+    The Master Customer Agreement contains no service-level commitment; it disclaims liability for
+    outages and unavailability and reserves suspension rights, but promises no availability target.
+    The status page reports availability after the fact (99.853% observed) without committing to it.
+  source: https://typesafe.ai/legal/mca
+support_lifetime:
+  published: false
+  note: 'No support window, LTS designation, or minimum version-support period is stated for the API or either SDK.'
+changelog:
+  api:
+    published: false
+    note: 'No API or product changelog. docs.typesafe.ai/changelog 404s and the docs index lists no such page.'
+  sdks:
+    published: true
+    urls:
+    - https://docs.typesafe.ai/sdk/python/changelog
+    - https://docs.typesafe.ai/sdk/javascript/changelog
+    artifact: changelog/typesafe-ai-changelog.yml
+terms:
+  master_customer_agreement: https://typesafe.ai/legal/mca
+  terms_of_use: https://typesafe.ai/legal/terms
+  privacy_policy: https://typesafe.ai/legal/privacy-policy
+  data_processing_agreement: https://typesafe.ai/legal/data-processing
+  probed_all: 200
+  archived_versions_published: false
+roadmap:
+  published: false
+  probed: [{url: 'https://typesafe.ai/roadmap', status: 404}]
+  note: >-
+    No roadmap page. Forward-looking statements exist but only as prose — the jaggedness page says
+    "many of these will be fixed in later versions" and the rate-limit warning references "upcoming
+    large GPU deals". No Roadmap pointer is emitted.
+maturity:
+  stage: early-access
+  signals:
+  - 'Marketing site: "Try our first System One Model, Jev, in early access"; primary CTA is "Join Waitlist".'
+  - 'Site footer: "TypeSafe AI Version 0.01".'
+  - 'Served OpenAPI info.version 0.2.0.'
+  - 'Both SDKs had their initial public release in September 2026 (Python 0.5.7 on 2026-09-14, JavaScript 0.5.7 on 2026-09-11).'
+  - 'Rate limits explicitly described as changing without notice.'
+  counter_signals:
+  - 'Published per-token price, status page with 90 days of history, security.txt, Vanta trust center, DPA and MCA — governance artifacts most companies at this stage do not have.'
+cross_links:
+  changelog: changelog/typesafe-ai-changelog.yml
+  conventions: conventions/typesafe-ai-conventions.yml
+  plans: plans/typesafe-ai-plans-pricing.yml
+  rate_limits: rate-limits/typesafe-ai-rate-limits.yml
+  packages: packages/typesafe-ai-packages.yml

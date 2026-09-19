@@ -1,0 +1,100 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  https://docs.typesafe.ai/sdk/python/changelog.md and
+  https://docs.typesafe.ai/sdk/javascript/changelog.md (Mintlify serves each docs page as Markdown
+  when `.md` is appended, so these were captured verbatim rather than scraped from rendered HTML).
+checked: '2026-09-19'
+summary: >-
+  TypeSafe publishes NO API or product changelog. What it does publish is two dated, well-structured
+  SDK changelogs — Breaking Changes / Features / Bug fixes / Documentation, every entry carrying a
+  semver version and an ISO date. Both libraries reached their first public release in September 2026
+  and both have already shipped a breaking change, which is the honest headline here: the clients are
+  moving weekly and are not yet stable.
+scheme:
+  api_versioning: path-segment (/v1) plus model alias
+  api_changelog: none
+  api_changelog_probes:
+  - {url: 'https://docs.typesafe.ai/changelog', status: 404}
+  - {url: 'https://typesafe.ai/changelog', status: 404}
+  sdk_versioning: semver
+  model_release_notes: >-
+    Not a changelog, but the nearest equivalent for the model itself is the per-version known-issues
+    page at https://docs.typesafe.ai/model-jaggedness/jev-1.13. See lifecycle/.
+current_version:
+  api_spec: 0.2.0
+  api_spec_source: https://api.typesafe.ai/openapi.json
+  python_sdk: 0.7.0
+  javascript_sdk: 0.6.0
+  model: jev-1.13.0
+feeds:
+  rss: null
+  atom: null
+  json: null
+  note: >-
+    No feed for either changelog. The only machine-readable change channel TypeSafe publishes is the
+    status-page Atom feed (https://status.typesafe.ai/feed.xml), which carries incidents, not releases.
+entries:
+- component: python-sdk
+  version: 0.7.0
+  date: '2026-09-18'
+  breaking: true
+  breaking_changes:
+  - 'ser/de library changed from `msgspec` to `pydantic`'
+  additions:
+  - '`system_one` accepts a new `response_model` argument that can be set to a desired pydantic model for additional type-safety'
+  fixes:
+  - '`str` subclasses are now correctly serialized as strings instead of lists of characters'
+  source: https://docs.typesafe.ai/sdk/python/changelog
+- component: python-sdk
+  version: 0.6.0
+  date: '2026-09-15'
+  breaking: true
+  breaking_changes:
+  - 'accept `Score.criteria` as an ordered sequence instead of a dictionary keyed by integers'
+  additions:
+  - 'improved type annotations on SDK inputs to accept abstract types like Mapping and Sequence'
+  - 'improved error messages to include http details and metadata'
+  fixes:
+  - 'handle invalid values in `RetryPolicy`'
+  - 'make exceptions and responses picklable'
+  docs:
+  - 'link more concepts from the main docs'
+  source: https://docs.typesafe.ai/sdk/python/changelog
+- component: python-sdk
+  version: 0.5.7
+  date: '2026-09-14'
+  breaking: false
+  highlights:
+  - 'Initial public release of the TypeSafe Python SDK.'
+  source: https://docs.typesafe.ai/sdk/python/changelog
+- component: javascript-sdk
+  version: 0.6.0
+  date: '2026-09-15'
+  breaking: true
+  breaking_changes:
+  - 'accept `Score.criteria` as an ordered sequence instead of a dictionary keyed by integers'
+  source: https://docs.typesafe.ai/sdk/javascript/changelog
+- component: javascript-sdk
+  version: 0.5.7
+  date: '2026-09-11'
+  breaking: false
+  highlights:
+  - 'Initial public release of the TypeSafe JavaScript and TypeScript SDK.'
+  source: https://docs.typesafe.ai/sdk/javascript/changelog
+entry_count: 5
+window: '2026-09-11 to 2026-09-18'
+observations:
+  coordinated_breaking_change: >-
+    The `Score.criteria` change landed in BOTH SDKs at 0.6.0 on the same day (2026-09-15), which
+    means the server-side contract for Score criteria changed from a dictionary keyed by integers to
+    an ordered sequence — and that server change is documented NOWHERE. The served OpenAPI now types
+    ScoreQuestion.criteria as an array with an example of ["Calm","Frustrated","Very angry"], so the
+    spec agrees with the new shape; nothing records that it used to be different. This is exactly
+    what an API changelog would carry and the SDK changelogs are carrying by proxy.
+  release_cadence: 'Four releases across two libraries in eight days.'
+  breaking_ratio: '3 of 5 entries are breaking, both libraries below 1.0.'
+cross_links:
+  packages: packages/typesafe-ai-packages.yml
+  lifecycle: lifecycle/typesafe-ai-lifecycle.yml
+  openapi: openapi/typesafe-ai-openapi.yml

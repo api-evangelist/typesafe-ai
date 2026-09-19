@@ -1,0 +1,86 @@
+generated: '2026-09-19'
+method: probed
+source: https://docs.typesafe.ai/.well-known/agent-card.json
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: docs.typesafe.ai
+  note: >-
+    Served on the documentation host, not the registrable domain and not the API host. typesafe.ai,
+    www.typesafe.ai and api.typesafe.ai all 404 both the canonical and the legacy path; the legacy
+    /.well-known/agent.json 404s on docs.typesafe.ai too. Probing only the primary domain would have
+    scored this provider zero on a document it genuinely publishes.
+conformance:
+  spec: A2A 1.0.0
+  grade: conformant
+  grade_basis: >-
+    All three hard checks pass — capabilities is an OBJECT ({streaming, pushNotifications}),
+    protocolVersion is present ("0.3"), and skills is an ARRAY. The optional fields that usually
+    separate near-conformant from conformant are all present as well: preferredTransport,
+    defaultInputModes and defaultOutputModes.
+  protocol_version: '0.3'
+  preferred_transport: HTTP+JSON
+  deviations:
+    - id: supportedInterfaces-instead-of-additionalInterfaces
+      severity: soft
+      detail: >-
+        The card carries supportedInterfaces[] rather than the A2A 1.0.0 additionalInterfaces[]
+        key. The entry inside it is well formed (url + protocolBinding + protocolVersion) but a
+        strict 1.0.0 consumer will not read it, so the transport list degrades to the top-level
+        url + preferredTransport pair. Not a hard failure and it does not change the grade.
+    - id: skills-carry-no-tags
+      severity: soft
+      detail: >-
+        The single skill declares tags: [] — an empty array. Valid, but it removes the only
+        machine-readable way to route a task to this agent by capability keyword.
+card:
+  name: TypeSafe AI
+  description: How to use TypeSafe's System One API
+  url: https://docs.typesafe.ai/
+  version: 1.0.0
+  protocol_version: '0.3'
+  provider:
+    organization: TypeSafe AI
+    url: https://docs.typesafe.ai/
+  documentation_url: https://docs.typesafe.ai/
+  capabilities:
+    streaming: false
+    push_notifications: false
+  default_input_modes: [text/plain]
+  default_output_modes: [text/plain]
+  skills: 1
+  file: typesafe-ai-agent-card.json
+skills:
+  - id: type-safe
+    name: TypeSafe
+    url: https://docs.typesafe.ai/.well-known/agent-skills/type-safe/skill.md
+    tags: []
+    probed:
+      url: https://docs.typesafe.ai/.well-known/agent-skills/type-safe/skill.md
+      status: 200
+      bytes: 12793
+      saved_as: ../skills/typesafe-ai-provider-docs-skill.md
+    description: >-
+      Use when building AI-powered decision systems that need structured, typed answers instead of
+      generated text. Reach for TypeSafe when you need to classify content, score items on a rubric,
+      answer yes/no questions, route requests, or compose multiple judgments into complex workflows.
+interpretation: >-
+  This is a DOCUMENTATION agent card, not an operational one. Its url, provider.url,
+  documentationUrl and its only interface entry all point at https://docs.typesafe.ai/ — the docs
+  site — and the skill it advertises is a reference document, not a callable task. The card's
+  practical value is that it hands an agent the entry point to TypeSafe's published skill and, via
+  the same host, an anonymous MCP server at https://docs.typesafe.ai/mcp (see mcp/). It does NOT
+  advertise the System One evaluation endpoint, which is the thing an agent would actually call:
+  api.typesafe.ai/v1/systemone appears nowhere in the card. Recorded as observed; the gap is the
+  provider's to close, not ours to fill in.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://docs.typesafe.ai/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json
+  bytes: 1143
+  body_shape: JSON object carrying 8 of the AgentCard fields (name, description, url, version, protocolVersion, capabilities, skills, provider)
+  negative_control:
+    url: https://docs.typesafe.ai/.well-known/typesafe-ai-negative-control-7f3ab91c.json
+    status: 404
+    verdict: Host 404s a path that cannot exist, so the 200 above is a genuine served document and not an SPA catch-all.

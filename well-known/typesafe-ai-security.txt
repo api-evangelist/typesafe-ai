@@ -1,0 +1,5 @@
+Contact: mailto:security@typesafe.ai
+Encryption: https://console.typesafe.ai/.well-known/pgp-key.asc
+Expires: 2027-02-26T00:00:00.000Z
+Canonical: https://console.typesafe.ai/.well-known/security.txt
+Preferred-Languages: en

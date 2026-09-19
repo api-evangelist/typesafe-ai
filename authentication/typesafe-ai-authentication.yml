@@ -1,0 +1,86 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  https://docs.typesafe.ai/api (Evaluation endpoint), https://docs.typesafe.ai/introduction/quickstart,
+  https://docs.typesafe.ai/sdk/python, https://docs.typesafe.ai/sdk/javascript and
+  https://docs.typesafe.ai/agent-skill — corroborated by the securitySchemes block in
+  openapi/typesafe-ai-openapi.yml (derived first, then upgraded from the docs).
+docs: https://docs.typesafe.ai/api
+summary:
+  types:
+  - http
+  model: static-bearer-api-key
+  model_note: >-
+    One mechanism, one credential, no negotiation. The API key IS the bearer token — there is no
+    token exchange, no OAuth flow, no refresh, no expiry documented, and no scope system. For an
+    agent this is the simplest possible auth story and also the least granular: a key is all-or-nothing
+    over both operations.
+  oauth2: false
+  openid_connect: false
+  mtls: false
+  scopes: false
+  scopes_note: >-
+    No scopes/ artifact is written and no OAuthScopes pointer is emitted. Nothing in the spec or the
+    docs declares an oauth2 securityScheme or a permission surface, so an empty scopes file would
+    assert a structure TypeSafe does not have.
+schemes:
+- name: HTTPBearer
+  type: http
+  scheme: bearer
+  in: header
+  header: Authorization
+  format: 'Bearer <API_KEY>'
+  documented: true
+  applied_to: all operations
+  applied_note: >-
+    The served spec declares components.securitySchemes.HTTPBearer but sets NO root `security`
+    requirement and no per-operation `security`, so the scheme is defined and never applied. Both
+    operations do require it in practice (401 Unauthorized on a missing or invalid key, per the
+    published error table). The gap is fixed without mutating the original in
+    overlays/typesafe-ai-openapi-overlay.yaml.
+  sources:
+  - openapi/typesafe-ai-openapi.yml
+  - https://docs.typesafe.ai/api
+credential:
+  kind: api-key
+  issuance: >-
+    Self-serve from the console once an account exists — https://console.typesafe.ai/keys (the page
+    302s to /login when unauthenticated). Account creation is gated: the marketing site's primary
+    call to action is "Join Waitlist" and Jev is described as early access.
+  env_var: TYPESAFE_API_KEY
+  env_var_note: >-
+    Both official SDKs read TYPESAFE_API_KEY from the environment with no argument, and the published
+    Agent Skill instructs agents to use the same variable. That single convention is what makes the
+    key usable by an agent without prompting a human for it.
+  rotation_documented: false
+  expiry_documented: false
+  prefix_documented: false
+  prefix_note: >-
+    No key prefix is published (no "ts_live_"-style discriminator documented), so a leaked key
+    cannot be recognised by shape and there is no published test-vs-live key distinction. See
+    sandbox/typesafe-ai-sandbox.yml.
+transport:
+  https_required: true
+  tls: TLSv1.3 observed on api.typesafe.ai
+  hsts: false
+  hsts_note: >-
+    api.typesafe.ai serves no Strict-Transport-Security header (typesafe.ai and docs.typesafe.ai
+    both do). See security/typesafe-ai-domain-security.yml.
+failure_modes:
+- status: 401
+  meaning: Missing or invalid API key. Check the Authorization header.
+  source: https://docs.typesafe.ai/api
+- status: 422
+  meaning: Request body failed validation; the body details the offending field.
+  source: openapi/typesafe-ai-openapi.yml
+agent_notes: >-
+  A bearer key in a header, one env var, no refresh and no scopes means an agent can authenticate in
+  one line and can NOT be granted least privilege. There is nothing to restrict a key to
+  GET /v1/models, so any agent holding a key can spend tokens on POST /v1/systemone. Cost, not data
+  loss, is the exposure — see plans/typesafe-ai-plans-pricing.yml for the published per-token price.
+cross_links:
+  conventions: conventions/typesafe-ai-conventions.yml
+  errors: errors/typesafe-ai-problem-types.yml
+  overlay: overlays/typesafe-ai-openapi-overlay.yaml
+  domain_security: security/typesafe-ai-domain-security.yml
+  rate_limits: rate-limits/typesafe-ai-rate-limits.yml

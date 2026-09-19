@@ -1,0 +1,110 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancement overlay for the TypeSafe System One API
+  version: 1.0.0
+extends: openapi/_original/typesafe-ai-openapi.json
+x-generated: '2026-09-19'
+x-method: generated
+x-source: openapi/_original/typesafe-ai-openapi.json
+x-rationale: >-
+  The spec TypeSafe serves at https://api.typesafe.ai/openapi.json is real, valid OpenAPI 3.1.0 with
+  excellent schema-level examples, and it is missing four things its own documentation supplies:
+  (1) no servers[] block, so a generated client has no base URL; (2) securitySchemes.HTTPBearer is
+  DEFINED but never APPLIED, so the spec never states that the API requires a key — while the docs
+  document a 401 for a missing one; (3) no tags anywhere, so a reference cannot be grouped; and
+  (4) only 200 and 422 responses, while the published error table documents 401, 429 and 529 as well.
+  This overlay adds all four from the provider's own published documentation WITHOUT mutating the
+  original. Apply with any Overlay 1.0.0 processor against openapi/_original/typesafe-ai-openapi.json.
+x-sources:
+  servers: https://docs.typesafe.ai/api
+  security: https://docs.typesafe.ai/api
+  responses: https://docs.typesafe.ai/api
+  tags: https://docs.typesafe.ai/primitives
+x-not-done: >-
+  Nothing here invents behaviour. No request or response field is added, no schema is changed, no
+  example is fabricated, and no rate-limit or idempotency header is asserted — TypeSafe documents no
+  rate-limit response header, so none is declared.
+actions:
+- target: $
+  description: Add the production server the provider publishes in its API reference and quickstart.
+  update:
+    servers:
+    - url: https://api.typesafe.ai
+      description: >-
+        TypeSafe System One API production host. Published as POST https://api.typesafe.ai/v1/systemone
+        at https://docs.typesafe.ai/api and in the quickstart cURL example.
+- target: $
+  description: >-
+    Apply the bearer scheme the spec already defines as a root security requirement. The docs
+    document 401 Unauthorized for a missing or invalid key on the API, so the requirement is global.
+  update:
+    security:
+    - HTTPBearer: []
+- target: $
+  description: Declare tags so the two operations can be grouped in a generated reference.
+  update:
+    tags:
+    - name: System One
+      description: >-
+        Evaluate a state against typed Noul / Choice / Score questions and receive calibrated,
+        structured answers.
+      externalDocs:
+        url: https://docs.typesafe.ai/api
+    - name: Models
+      description: Discover the model names and aliases the calling account may send in the `model` field.
+      externalDocs:
+        url: https://docs.typesafe.ai/models
+- target: $.components.securitySchemes.HTTPBearer
+  description: Describe the bearer credential using the provider's own wording.
+  update:
+    description: >-
+      TypeSafe API key sent as `Authorization: Bearer <API_KEY>`. Create a key at
+      https://console.typesafe.ai/keys. Both official SDKs read it from the TYPESAFE_API_KEY
+      environment variable. No scopes, no expiry and no key prefix are published — see
+      authentication/typesafe-ai-authentication.yml.
+- target: $.paths['/v1/systemone'].post
+  description: Tag the evaluation operation.
+  update:
+    tags:
+    - System One
+- target: $.paths['/v1/models'].get
+  description: Tag the model-discovery operation.
+  update:
+    tags:
+    - Models
+- target: $.paths['/v1/systemone'].post.responses
+  description: >-
+    Add the three documented failure responses the served spec omits. Status meanings are quoted from
+    the provider's published Errors table at https://docs.typesafe.ai/api; no body schema is asserted
+    for them because the provider declares none.
+  update:
+    '401':
+      description: >-
+        Unauthorized — missing or invalid API key. Check the Authorization header. (Published at
+        https://docs.typesafe.ai/api; no response schema is documented.)
+    '429':
+      description: >-
+        Too Many Requests — you have exceeded your rate limit. Back off and retry after a short
+        delay. Published limits are 250,000 tokens per second and 1,200 requests per minute; either
+        one triggers this. A `retry-after` header is honoured by the official SDKs when the response
+        carries one, but is not guaranteed.
+    '529':
+      description: >-
+        Overloaded — TypeSafe is temporarily overloaded. Retry after a short delay with exponential
+        backoff. NOTE: 529 is not an IANA-registered HTTP status code; clients must add it to their
+        retryable set explicitly.
+- target: $.paths['/v1/models'].get.responses
+  description: Add the documented unauthorized response to the model-discovery operation.
+  update:
+    '401':
+      description: Unauthorized — missing or invalid API key. Check the Authorization header.
+- target: $.info
+  description: >-
+    Add the external documentation and contact the provider publishes, and record the real terms
+    location. All three are live TypeSafe URLs.
+  update:
+    contact:
+      name: TypeSafe AI
+      url: https://docs.typesafe.ai/
+      email: support@typesafe.ai
+    termsOfService: https://typesafe.ai/legal/terms

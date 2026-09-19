@@ -1,23 +1,253 @@
 aid: typesafe-ai
 name: TypeSafe AI
-description: TypeSafe AI is a company added to the API Evangelist network by direct request for full-pipeline
-  profiling.
+description: >-
+  TypeSafe AI is a San Francisco AI lab building System One models — a class of model trained to
+  return typed, calibrated decisions for software instead of generated text. Its flagship and first
+  System One model, Jev, is served by a single HTTP endpoint: POST /v1/systemone takes a `state`
+  (a string, JSON object, or array) plus a map of typed questions and returns one structured answer
+  per question. Three question primitives are published: Noul (a yes/no question answered with the
+  probability the answer is yes), Choice (one option from a caller-defined set, returned with the
+  full probability distribution) and Score (a rating against ordered rubric levels, returned as a
+  probability-weighted value plus a legend). Choice and Score answers also carry a confidence value
+  derived from the distribution, which is the mechanism TypeSafe intends callers to threshold on to
+  decide when code may act autonomously and when it must escalate to a human. The model is trained
+  with Reinforcement Learning for Calibrated Decisions (RLCD) rather than RLHF, is not fine-tuned or
+  LoRA-adapted per customer, and is not trained on customer requests or responses. The company
+  publishes an OpenAPI 3.1 contract on its API host, official Python and TypeScript SDKs, an
+  installable Agent Skill for Claude Code and other coding agents, an A2A agent card, an anonymous
+  documentation MCP server, an llms.txt index, a Better Stack status page and a Vanta trust center.
 url: https://raw.githubusercontent.com/api-evangelist/typesafe-ai/refs/heads/main/apis.yml
+image: https://framerusercontent.com/images/RtIGTDwO43jR4ZDilesXiR5znc.jpg
 x-type: company
 x-source: harvest:direct-request
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
 tags:
-- Company
-apis: []
+- Artificial Intelligence
+- Machine Learning
+- Classification
+- Content Moderation
+- Decision Support
+- Structured Outputs
+- Inference
+- LLM Alternative
+- Agent Skills
+- MCP
+- agent-native
+- Developer Tools
+tags_raw:
+- artificial-intelligence
+- machine-learning
+- classification
+- content-moderation
+- decision-support
+- structured-outputs
+- inference
+- llm-alternative
+- agent-skills
+- mcp
+- agent-native
+- developer-tools
+apis:
+- aid: typesafe-ai:system-one-api
+  name: TypeSafe System One API
+  description: >-
+    The TypeSafe System One HTTP API. POST /v1/systemone evaluates a `state` against a map of typed
+    Noul / Choice / Score questions and returns one calibrated answer per question with
+    probabilities, confidence and token usage; GET /v1/models lists the model names and aliases the
+    calling account may send. Authentication is a bearer API key in the Authorization header.
+    OpenAPI 3.1.0 is served anonymously at https://api.typesafe.ai/openapi.json with a ReDoc
+    renderer at /redoc.
+  humanURL: https://docs.typesafe.ai/api
+  baseURL: https://api.typesafe.ai
+  tags:
+  - Artificial Intelligence
+  - Machine Learning
+  - Classification
+  - Content Moderation
+  - Decision Support
+  - Structured Outputs
+  - Inference
+  tags_raw:
+  - artificial-intelligence
+  - machine-learning
+  - classification
+  - content-moderation
+  - decision-support
+  - structured-outputs
+  - inference
+  properties:
+  - type: OpenAPI
+    url: openapi/typesafe-ai-openapi.yml
+  - type: OpenAPI
+    name: OpenAPI (provider-hosted)
+    url: https://api.typesafe.ai/openapi.json
+  - type: Documentation
+    url: https://docs.typesafe.ai/introduction
+  - type: APIReference
+    url: https://docs.typesafe.ai/api
+  - type: GettingStarted
+    url: https://docs.typesafe.ai/introduction/quickstart
+  - type: Authentication
+    url: authentication/typesafe-ai-authentication.yml
+  - type: Conventions
+    url: conventions/typesafe-ai-conventions.yml
+  - type: ErrorCatalog
+    url: errors/typesafe-ai-problem-types.yml
+  - type: DataModel
+    url: data-model/typesafe-ai-data-model.yml
+  - type: Examples
+    url: examples/typesafe-ai-examples.yml
+  - type: Overlay
+    url: overlays/typesafe-ai-openapi-overlay.yaml
+  - type: RateLimits
+    url: rate-limits/typesafe-ai-rate-limits.yml
+- aid: typesafe-ai:docs-mcp
+  name: TypeSafe AI Documentation MCP Server
+  description: >-
+    Hosted, anonymous, read-mostly MCP server over the published TypeSafe documentation corpus.
+    Three tools: search_type_safe_ai (knowledge-base search), query_docs_filesystem_type_safe_ai
+    (read-only rg/tree/head over a virtualised in-memory filesystem of the docs) and
+    submit_feedback (the one write, reporting a documentation defect). It does NOT expose the System
+    One evaluation endpoint — an agent can read everything about Jev over MCP and call none of it.
+  humanURL: https://docs.typesafe.ai/introduction
+  baseURL: https://docs.typesafe.ai/mcp
+  tags:
+  - MCP
+  - agent-native
+  - Developer Tools
+  tags_raw:
+  - mcp
+  - agent-native
+  - developer-tools
+  properties:
+  - type: MCPServer
+    url: mcp/typesafe-ai-mcp.yml
+  - type: MCPServer
+    name: MCP endpoint (provider-hosted)
+    url: https://docs.typesafe.ai/mcp
+  - type: ToolCrosswalk
+    url: mcp/typesafe-ai-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.typesafe.ai/agent-skill
+common:
+- type: VulnerabilityDisclosure
+  url: security/typesafe-ai-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/typesafe-ai-domain-security.yml
+- type: Website
+  url: https://typesafe.ai/
+- type: DeveloperPortal
+  url: https://docs.typesafe.ai/
+- type: Documentation
+  url: https://docs.typesafe.ai/introduction
+- type: APIReference
+  url: https://docs.typesafe.ai/api
+- type: GettingStarted
+  url: https://docs.typesafe.ai/introduction/quickstart
+- type: SignUp
+  name: Console sign-up / sign-in (passwordless — Continue with Google or emailed code)
+  url: https://console.typesafe.ai/
+- type: Login
+  url: https://console.typesafe.ai/login
+- type: TermsOfService
+  url: https://typesafe.ai/legal/terms
+- type: PrivacyPolicy
+  url: https://typesafe.ai/legal/privacy-policy
+- type: GitHubOrganization
+  url: https://github.com/typesafe-ai
+- type: Blog
+  url: https://typesafe.ai/blog/introducing-system-one-models-and-jev
+- type: Leadership
+  url: https://typesafe.ai/team
+- type: StatusPage
+  url: https://status.typesafe.ai/
+- type: TrustCenter
+  name: Trust center (provider-hosted, Vanta)
+  url: https://trust.typesafe.ai/
+- type: MCPServer
+  url: mcp/typesafe-ai-mcp.yml
+- type: AgentCard
+  url: a2a/typesafe-ai-a2a.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/typesafe-ai-llms.txt
+- type: WellKnown
+  url: well-known/typesafe-ai-well-known.yml
+- type: SecurityTxt
+  url: well-known/typesafe-ai-security.txt
+- type: Packages
+  url: packages/typesafe-ai-packages.yml
+- type: SDKs
+  url: packages/typesafe-ai-packages.yml
+- type: Authentication
+  url: authentication/typesafe-ai-authentication.yml
+- type: Conventions
+  url: conventions/typesafe-ai-conventions.yml
+- type: Conformance
+  url: conformance/typesafe-ai-conformance.yml
+- type: ErrorCatalog
+  url: errors/typesafe-ai-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/typesafe-ai-lifecycle.yml
+- type: ChangeLog
+  url: changelog/typesafe-ai-changelog.yml
+- type: Plans
+  url: plans/typesafe-ai-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/typesafe-ai-rate-limits.yml
+- type: Sandbox
+  url: sandbox/typesafe-ai-sandbox.yml
+- type: DataModel
+  url: data-model/typesafe-ai-data-model.yml
+- type: Examples
+  url: examples/typesafe-ai-examples.yml
+- type: Overlay
+  url: overlays/typesafe-ai-openapi-overlay.yaml
+- type: Careers
+  url: https://jobs.ashbyhq.com/typesafe-ai
+- type: Security
+  url: security/typesafe-ai-vulnerability-disclosure.yml
+- type: TrustCenter
+  name: Trust center probe (artifact)
+  url: security/typesafe-ai-trust-center.yml
+- type: IncidentNotification
+  name: 72-hour security-incident notification (DPA 5.2) — harvest record in regulatory/typesafe-ai-regulatory-posture.yml
+  url: https://typesafe.ai/legal/data-processing
+- type: Subprocessors
+  name: Subprocessor list named by the DPA (Vanta trust center; table is JS-rendered)
+  url: https://trust.typesafe.ai/subprocessors
+- type: DataResidency
+  name: Hosted in the United States (Privacy Policy, International Visitors)
+  url: https://typesafe.ai/legal/privacy-policy
+- type: AITransparency
+  name: Per-version model limitations (jev-1.13 jaggedness)
+  url: https://docs.typesafe.ai/model-jaggedness/jev-1.13
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
-common:
-- type: Website
-  url: https://typesafe.ai/
+x-enrichment:
+  date: '2026-09-19'
+  status: enriched
+  artifacts_added: 32
+  pass: local-v3
+x-coverage:
+  state: covered
+  reason: null
+  detail: >-
+    Fully covered. The machine-readable contract was found on the API host root
+    (https://api.typesafe.ai/openapi.json, 200, OpenAPI 3.1.0) after the docs host returned
+    "Asset not found" for every spec path, and the provider additionally serves a conformant A2A
+    agent card, a live anonymous MCP server, two published Agent Skills and an llms.txt.
+  evidence:
+    - url: https://api.typesafe.ai/openapi.json
+      status: 200
+    - url: https://docs.typesafe.ai/.well-known/agent-card.json
+      status: 200
+    - url: https://docs.typesafe.ai/mcp
+      status: 200
+  checked: '2026-09-19'

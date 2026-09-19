@@ -1,0 +1,311 @@
+generated: '2026-09-19'
+method: probed
+source: live probes of the named /.well-known/ path list on every TypeSafe host
+checked: '2026-09-19'
+summary: >-
+  Two real documents are served across five hosts. console.typesafe.ai serves an RFC 9116
+  security.txt, and docs.typesafe.ai serves an A2A Agent Card at the canonical
+  /.well-known/agent-card.json path. Both the WellKnown and the SecurityTxt pointer are
+  therefore earned. Nothing else is served anywhere: no OIDC discovery, no RFC 8414 / RFC 9728
+  OAuth metadata, no api-catalog, no ai-plugin.json, no AAuth resource document, no UCP/ACP,
+  and no apis.json index on any host or at either domain-root path.
+pointer_basis: >-
+  WellKnown emitted on the strength of the security.txt (console.typesafe.ai) and the agent card
+  (docs.typesafe.ai). SecurityTxt emitted on the strength of the console.typesafe.ai security.txt.
+  The agent card is registered separately as AgentCard via a2a/typesafe-ai-a2a.yml.
+false_positive_watch: >-
+  console.typesafe.ai answers HTTP 200 with the 43,618-byte Next.js console SPA shell for EVERY
+  path, including a negative-control path that cannot exist. Every 200 on that host below is
+  recorded as a MISS except the security.txt, which is distinguishable on three independent
+  grounds: content-type text/plain rather than text/html, a 223-byte body rather than the 43,618-byte
+  shell, and a body that parses as RFC 9116 field lines. A future round that promotes any other
+  console.typesafe.ai /.well-known/ 200 into a served document is wrong.
+hosts:
+  - host: https://console.typesafe.ai
+    documents:
+      - path: /.well-known/security.txt              # RFC 9116
+        status: 200
+        file: typesafe-ai-security.txt
+        content_type: text/plain; charset=UTF-8
+        bytes: 223
+      - path: /.well-known/openid-configuration
+        status: 200
+        served_document: false
+        verdict: MISS — 43,618-byte console SPA shell (text/html), not a document
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/oauth-protected-resource
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/api-catalog
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/api-catalog.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/ai-plugin.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/aauth-resource.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell; no issuer/jwks_uri, body is HTML
+      - path: /.well-known/ucp.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/acp.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/apis.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell; no apis[] / specificationVersion
+      - path: /apis.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /apis.yml
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+      - path: /.well-known/agent-card.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell (HTML), not an AgentCard
+      - path: /.well-known/agent.json
+        status: 200
+        served_document: false
+        verdict: MISS — SPA shell
+    soft_404_control:
+      path: /.well-known/typesafe-ai-negative-control-7f3ab91c.json
+      status: 200
+      bytes: 43618
+      content_type: text/html; charset=utf-8
+      verdict: >-
+        Host is a catch-all. Every /.well-known/* 200 on console.typesafe.ai is the console SPA
+        shell unless its content-type and byte count differ from this control, which only the
+        security.txt does.
+    path_echo_control: passed
+    path_echo_note: >-
+      The control body is a generic HTML shell; it does not echo the requested path back inside a
+      validly-shaped JSON document, so this host is a soft-404 catch-all rather than a path-echoing
+      host of the data.nasdaq.com kind. No hit is discarded on path-echo grounds.
+    hit_count: 1
+  - host: https://docs.typesafe.ai
+    documents:
+      - path: /.well-known/agent-card.json           # A2A 1.0.0 / RFC 8615
+        status: 200
+        file: ../a2a/typesafe-ai-agent-card.json
+        content_type: application/json
+        bytes: 1143
+        note: >-
+          Real AgentCard-shaped JSON object. Graded in a2a/typesafe-ai-a2a.yml. Its single skill
+          points at https://docs.typesafe.ai/.well-known/agent-skills/type-safe/skill.md, which is
+          also served (200) and saved verbatim as skills/typesafe-ai-provider-docs-skill.md.
+      - path: /.well-known/security.txt
+        status: 404
+        body: Asset not found
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/api-catalog.json
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/aauth-resource.json
+        status: 404
+      - path: /.well-known/ucp.json
+        status: 404
+      - path: /.well-known/acp.json
+        status: 404
+      - path: /.well-known/apis.json
+        status: 404
+      - path: /apis.json
+        status: 404
+      - path: /apis.yml
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+    soft_404_control:
+      path: /.well-known/typesafe-ai-negative-control-7f3ab91c.json
+      status: 404
+      bytes: 15
+      verdict: Clean 404. The agent-card 200 on this host is a genuine served document.
+    path_echo_control: passed
+    hit_count: 1
+  - host: https://api.typesafe.ai
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+        body: '{"detail":"Not Found"}'
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/api-catalog.json
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/aauth-resource.json
+        status: 404
+      - path: /.well-known/ucp.json
+        status: 404
+      - path: /.well-known/acp.json
+        status: 404
+      - path: /.well-known/apis.json
+        status: 404
+      - path: /apis.json
+        status: 404
+      - path: /apis.yml
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+    soft_404_control:
+      path: /.well-known/typesafe-ai-negative-control-7f3ab91c.json
+      status: 404
+      verdict: Clean 404 — the API host answers honestly. These absences are confirmed, not masked.
+    path_echo_control: passed
+    hit_count: 0
+    note: >-
+      The API host itself serves no discovery documents, but it DOES serve its OpenAPI at
+      https://api.typesafe.ai/openapi.json (200) and a ReDoc renderer at /redoc (200) — see
+      openapi/. That spec is the contract this well-known surface does not advertise; a
+      /.well-known/api-catalog naming it would be the cheapest discovery win available here.
+  - host: https://typesafe.ai
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/api-catalog.json
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/aauth-resource.json
+        status: 404
+      - path: /.well-known/ucp.json
+        status: 404
+      - path: /.well-known/acp.json
+        status: 404
+      - path: /.well-known/apis.json
+        status: 404
+      - path: /apis.json
+        status: 404
+      - path: /apis.yml
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+    soft_404_control:
+      path: /.well-known/typesafe-ai-negative-control-7f3ab91c.json
+      status: 404
+      verdict: Clean 404. Framer-hosted marketing site; same result on www.typesafe.ai.
+    path_echo_control: passed
+    hit_count: 0
+  - host: https://www.typesafe.ai
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/api-catalog.json
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/aauth-resource.json
+        status: 404
+      - path: /.well-known/ucp.json
+        status: 404
+      - path: /.well-known/acp.json
+        status: 404
+      - path: /.well-known/apis.json
+        status: 404
+      - path: /apis.json
+        status: 404
+      - path: /apis.yml
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+    soft_404_control:
+      path: /.well-known/typesafe-ai-negative-control-7f3ab91c.json
+      status: 404
+    path_echo_control: passed
+    hit_count: 0
+    note: www.typesafe.ai 301s to typesafe.ai; probed separately for completeness.
+security_txt:
+  file: typesafe-ai-security.txt
+  host: console.typesafe.ai
+  rfc: RFC 9116
+  fields:
+    Contact: mailto:security@typesafe.ai
+    Encryption: https://console.typesafe.ai/.well-known/pgp-key.asc
+    Expires: '2027-02-26T00:00:00.000Z'
+    Canonical: https://console.typesafe.ai/.well-known/security.txt
+    Preferred-Languages: en
+  expires_valid: true
+  policy_field_present: false
+  policy_note: >-
+    No Policy: field, so the document names a contact but no published disclosure process. See
+    security/typesafe-ai-vulnerability-disclosure.yml.
+  canonical_mismatch_note: >-
+    The Canonical field names console.typesafe.ai, which is where the document is actually served.
+    It is NOT served on the registrable domain typesafe.ai, so a researcher following RFC 9116's
+    own guidance (look at the organisation's primary domain first) will 404 before finding it.
+    Serving the same file at https://typesafe.ai/.well-known/security.txt is a one-file fix.
+a2a:
+  agent_card_found: true
+  host: docs.typesafe.ai
+  path: /.well-known/agent-card.json
+  canonical_path: true
+  artifact: ../a2a/typesafe-ai-a2a.yml
+  hosts_probed: [typesafe.ai, www.typesafe.ai, api.typesafe.ai, docs.typesafe.ai, console.typesafe.ai]
+  paths_probed: [/.well-known/agent-card.json, /.well-known/agent.json]
+  checked: '2026-09-19'
+apis_json:
+  found: false
+  paths_probed: [/.well-known/apis.json, /apis.json, /apis.yml]
+  hosts_probed: [typesafe.ai, www.typesafe.ai, api.typesafe.ai, docs.typesafe.ai, console.typesafe.ai]
+  note: >-
+    Every path 404s except on console.typesafe.ai, where the 200 is the SPA shell and carries
+    neither apis[] nor specificationVersion. No adopter recorded.
+aauth:
+  found: false
+  path: /.well-known/aauth-resource.json
+  note: >-
+    404 on every honest host; the console 200 is the SPA shell and carries neither issuer nor
+    jwks_uri. TypeSafe serves no OAuth/OIDC discovery document anywhere, so it is not in the
+    AAuth-adjacent cohort at all — auth is a static bearer API key (see authentication/).

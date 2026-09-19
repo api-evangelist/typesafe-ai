@@ -1,0 +1,88 @@
+generated: '2026-09-19'
+method: derived
+source: >-
+  mcp/typesafe-ai-mcp-tools.json (live tools/list from https://docs.typesafe.ai/mcp, probed
+  2026-09-19) bound against openapi/typesafe-ai-openapi.yml (live from
+  https://api.typesafe.ai/openapi.json, 2 operations).
+summary: >-
+  The two surfaces do not overlap AT ALL. TypeSafe's MCP server is a documentation server on the
+  docs host; its REST API is an inference endpoint on the API host. Zero of three MCP tools bind to
+  a REST operation, and both REST operations are unreachable from MCP. The crosswalk is emitted
+  precisely because that divergence is the finding: an agent connected to TypeSafe's MCP server can
+  read everything about System One and call none of it.
+coverage:
+  mcp_tools: 3
+  rest_operations: 2
+  bound: 0
+  mcp_only: 3
+  rest_only: 2
+  bound_pct: 0.0
+crosswalk: []
+crosswalk_note: >-
+  Deliberately empty. No MCP tool is backed by a public REST operation, so recording a
+  low-confidence name-similarity guess here would invent a binding that does not exist.
+mcp_only:
+  - tool: search_type_safe_ai
+    reason: >-
+      Documentation search over the published docs corpus. There is no public REST search endpoint —
+      the API surface is two operations, neither of which searches anything. Backed by Mintlify's
+      docs index, not by api.typesafe.ai.
+  - tool: query_docs_filesystem_type_safe_ai
+    reason: >-
+      Read-only query against a virtualized in-memory filesystem of documentation chunks. No REST
+      equivalent; the nearest public analogue is fetching https://docs.typesafe.ai/<page>.md or the
+      llms.txt index directly over HTTP.
+  - tool: submit_feedback
+    reason: >-
+      Writes a documentation-feedback record to the docs team. No public REST operation accepts
+      feedback of any kind.
+rest_only:
+  - operationId: systemone_v1_systemone_post
+    method: POST
+    path: /v1/systemone
+    summary: Systemone
+    reason: >-
+      THE product operation — evaluate a `state` against a map of typed Noul/Choice/Score questions
+      and return calibrated answers with probabilities and confidence. Not exposed as an MCP tool.
+      An agent must call it over HTTP with a bearer key, or install TypeSafe's published Agent Skill
+      (skills/) which teaches exactly that.
+    consequence: read-only-compute
+    consequence_note: >-
+      Billable (input tokens charged, output free) but non-mutating: it creates no server-side
+      resource, so there is nothing to reverse. See conventions/ reversibility.
+  - operationId: models_v1_v1_models_get
+    method: GET
+    path: /v1/models
+    summary: Models V1
+    reason: >-
+      Model/alias discovery (name, description, release_date). Not exposed as an MCP tool. An agent
+      that wanted to pick a model version over MCP would have to read the docs page instead of
+      querying the live list.
+    consequence: read-only
+surfaces:
+  openapi:
+    local: openapi/typesafe-ai-openapi.yml
+    remote: https://api.typesafe.ai/openapi.json
+    gated: false
+    note: Served anonymously; 2 operations, 16 schemas, bearer auth declared.
+  mcp:
+    url: https://docs.typesafe.ai/mcp
+    gated: false
+    note: Anonymous tools/list returns full inputSchema for all 3 tools — no authenticated introspection needed.
+  graphql:
+    endpoint: null
+    note: No GraphQL surface. /graphql 404s on api.typesafe.ai and docs.typesafe.ai.
+  agent_skill:
+    urls:
+      - https://docs.typesafe.ai/.well-known/agent-skills/type-safe/skill.md
+      - https://raw.githubusercontent.com/typesafe-ai/skills/main/skills/typesafe-ai/SKILL.md
+    gated: false
+    note: >-
+      The real bridge between the two surfaces. Both published skills instruct an agent to call
+      POST https://api.typesafe.ai/v1/systemone directly with TYPESAFE_API_KEY, which is how the
+      REST-only operations above actually reach agents today.
+confidence: high
+confidence_note: >-
+  Both sides were read live and anonymously — the MCP inputSchemas from tools/list and the REST
+  operations from the served OpenAPI — so this is an observed divergence, not an inference from
+  names or docs.

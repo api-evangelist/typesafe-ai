@@ -1,0 +1,189 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  openapi/typesafe-ai-openapi.yml (live from https://api.typesafe.ai/openapi.json),
+  well-known/typesafe-ai-well-known.yml (live /.well-known/ probes), a2a/typesafe-ai-a2a.yml,
+  mcp/typesafe-ai-mcp.yml, https://docs.typesafe.ai/api and https://typesafe.ai/legal/data-processing.
+checked: '2026-09-19'
+summary: >-
+  TypeSafe conforms to the machine-readable specifications that matter for agent discovery — OpenAPI
+  3.1.0, MCP 2025-06-18, A2A 1.0.0 (a conformant card), llms.txt, RFC 9116 — and to none of the
+  HTTP-semantics conventions that matter at runtime: no RFC 9457 problem details, no RFC 8594
+  sunset signalling, no RFC 9238 rate-limit fields, no OAuth/OIDC discovery. It is a young API that
+  invested in being FOUND by agents before being POLITE to clients.
+standards:
+- id: openapi-3.1
+  conforms: true
+  evidence: >-
+    https://api.typesafe.ai/openapi.json returns a valid OpenAPI 3.1.0 document anonymously
+    (openapi "3.1.0", 2 paths, 16 components.schemas, 1 securityScheme). Saved verbatim at
+    openapi/_original/typesafe-ai-openapi.json.
+- id: openapi-servers-declared
+  conforms: false
+  evidence: >-
+    The served document declares NO servers[] block, so a generated client has no base URL and an
+    agent reading only the spec cannot tell where to send the request. The host is published in the
+    docs (https://api.typesafe.ai/v1/systemone) and is added in openapi/typesafe-ai-openapi.yml and
+    overlays/typesafe-ai-openapi-overlay.yaml.
+- id: openapi-security-applied
+  conforms: false
+  evidence: >-
+    components.securitySchemes.HTTPBearer is defined but no root `security` requirement and no
+    per-operation `security` is set, so the spec never says the API needs a key. It does — 401 on a
+    missing key is documented. Repaired in the overlay without mutating the original.
+- id: openapi-operations-tagged
+  conforms: false
+  evidence: 'Zero `tags` on either operation and no root tags[] — nothing to group a reference by.'
+- id: openapi-examples-in-spec
+  conforms: true
+  evidence: >-
+    Every one of the 16 schemas carries field-level `examples` (40 example values in total), including
+    realistic end-to-end request and response bodies on SystemOneRequest / SystemOneResponse. See
+    examples/typesafe-ai-examples.yml.
+- id: openapi-operationids-unique
+  conforms: true
+  evidence: 'systemone_v1_systemone_post and models_v1_v1_models_get — both present, both unique (FastAPI-generated, not hand-authored).'
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: >-
+    Errors are application/json with a FastAPI {"detail": [...]} envelope; zero application/problem+json
+    media types in the spec, and no type/title/instance fields. Observed live:
+    https://api.typesafe.ai/ returns {"detail":"Not Found"}.
+- id: rfc9110-http-semantics
+  conforms: partial
+  evidence: >-
+    Standard methods and statuses except for 529 Overloaded, which is not in the IANA HTTP status
+    registry. Documented and retryable, but a client switching on registered codes will not know it.
+- id: rfc9238-ratelimit-headers
+  conforms: false
+  evidence: >-
+    No RateLimit / RateLimit-Policy fields and no X-RateLimit-* family documented or observed. The
+    only runtime signal is a conditional `retry-after` — the docs say the SDKs honour it "when the
+    response carries one".
+- id: rfc8594-sunset-header
+  conforms: false
+  evidence: 'No Sunset or Deprecation header, and no deprecation policy published. See lifecycle/.'
+- id: rfc9116-security-txt
+  conforms: true
+  evidence: >-
+    https://console.typesafe.ai/.well-known/security.txt returns 200 with Contact, Encryption,
+    Expires (2027-02-26, unexpired), Canonical and Preferred-Languages. Not served on the registrable
+    domain. No Policy field.
+- id: mcp
+  conforms: true
+  evidence: >-
+    Hosted MCP server at https://docs.typesafe.ai/mcp answered an anonymous JSON-RPC tools/list with
+    protocolVersion 2025-06-18, serverInfo {name "TypeSafe AI", version "1.0.0"} and three tools with
+    full inputSchema. Documentation-scoped, not inference-scoped.
+- id: a2a-1.0.0
+  conforms: true
+  evidence: >-
+    https://docs.typesafe.ai/.well-known/agent-card.json returns a conformant AgentCard —
+    capabilities is an object, protocolVersion "0.3" is present, skills is an array, and the optional
+    preferredTransport / defaultInputModes / defaultOutputModes are all present. Graded in
+    a2a/typesafe-ai-a2a.yml; one soft deviation (supportedInterfaces rather than additionalInterfaces).
+- id: llmstxt
+  conforms: true
+  evidence: >-
+    https://docs.typesafe.ai/llms.txt returns 200 text/plain, 16,360 bytes, ~110 entries in valid
+    llms.txt form, and every page is separately fetchable as Markdown by appending `.md`. Saved at
+    llms/typesafe-ai-llms.txt.
+- id: agent-skills
+  conforms: true
+  evidence: >-
+    Two provider-published Agent Skills with valid frontmatter — one served from the docs host at
+    /.well-known/agent-skills/type-safe/skill.md (200) and one from
+    github.com/typesafe-ai/skills, installable as a Claude Code plugin. Saved verbatim in skills/.
+- id: oauth2
+  conforms: false
+  evidence: >-
+    No OAuth 2.0 anywhere. Auth is a static bearer API key. /.well-known/oauth-authorization-server
+    and /.well-known/oauth-protected-resource 404 on every honest host.
+- id: oidc-discovery
+  conforms: false
+  evidence: '/.well-known/openid-configuration 404 on typesafe.ai, api.typesafe.ai and docs.typesafe.ai.'
+- id: rfc8414-authorization-server-metadata
+  conforms: false
+  evidence: 404 on every host probed.
+- id: rfc9728-protected-resource-metadata
+  conforms: false
+  evidence: >-
+    404 on every host probed. Notable because the MCP server is anonymous — there is no protected
+    resource to describe, which is consistent rather than an omission.
+- id: aauth
+  conforms: false
+  evidence: '/.well-known/aauth-resource.json 404 on every honest host; no issuer/jwks_uri anywhere.'
+- id: apisjson
+  conforms: false
+  evidence: '/apis.json, /apis.yml and /.well-known/apis.json all 404 (the console 200s are SPA shells).'
+- id: well-known-api-catalog
+  conforms: false
+  evidence: >-
+    RFC 9727 /.well-known/api-catalog 404s on every honest host. Worth flagging: TypeSafe DOES serve
+    its OpenAPI at api.typesafe.ai/openapi.json, so an api-catalog naming it would be a one-file
+    change that makes the contract discoverable from the domain root.
+- id: graphql
+  conforms: false
+  evidence: 'No GraphQL surface; /graphql 404s on api.typesafe.ai and docs.typesafe.ai.'
+- id: asyncapi
+  conforms: false
+  applicable: false
+  evidence: >-
+    No event, webhook or streaming surface exists to describe. The provider's own agent card declares
+    capabilities.streaming false and capabilities.pushNotifications false. Not-applicable rather than
+    missing.
+- id: grpc-protobuf
+  conforms: false
+  applicable: false
+  evidence: 'No .proto published in the GitHub org and no gRPC surface documented.'
+- id: soap-wsdl
+  conforms: false
+  applicable: false
+  evidence: 'No SOAP surface. api.typesafe.ai/?wsdl returns the FastAPI 404 JSON.'
+- id: json-schema-2020-12
+  conforms: true
+  evidence: >-
+    The OpenAPI 3.1.0 document uses the 2020-12 JSON Schema dialect for all 16 component schemas
+    (anyOf/prefixItems/const forms present), which is what makes the request bodies directly usable as
+    validation schemas by a client or an agent.
+- id: gdpr-processor-terms
+  conforms: true
+  evidence: >-
+    A Data Processing Agreement is published at https://typesafe.ai/legal/data-processing incorporating
+    the EU SCCs (Implementing Decision 2021/914) and the UK International Data Transfer Addendum
+    (Version B1.0), with a named subprocessor list location and a 72-hour security-incident
+    notification commitment. See regulatory/typesafe-ai-regulatory-posture.yml.
+- id: ccpa-service-provider-terms
+  conforms: true
+  evidence: >-
+    The DPA carries explicit CCPA no-sell / no-share and purpose-limitation undertakings
+    ("Typesafe will not (a) 'sell' or 'share' ... Customer Personal Data").
+domain_standard:
+  applicable: false
+  market: AI model inference / structured decisioning
+  finding: >-
+    No domain standard exists for this market to conform to. There is no interoperability
+    specification for calibrated-decision inference — no shared schema for a typed question, a
+    probability distribution, or a confidence value — and TypeSafe is arguably defining the category
+    (its "System One", "Noul", "RLCD" vocabulary is its own). REWARD-ONLY dimension: recorded as
+    not-applicable, never as a failure, and nothing is invented to fill the slot.
+  adjacent_standards_considered:
+  - {id: openai-chat-completions-shape, applicable: false, reason: 'De facto, not a standard, and deliberately not what this API is — it returns typed answers, not message completions.'}
+  - {id: openinference-otel-genai, applicable: false, reason: 'Observability semantic conventions for LLM calls; TypeSafe publishes no tracing surface to annotate (no request-id header).'}
+  - {id: mcp, applicable: true, conforms: true, reason: 'The one cross-cutting agent standard this provider does implement — see above.'}
+compliance:
+  certifications_published: unknown
+  certifications_observed: []
+  note: >-
+    A Vanta trust center exists at trust.typesafe.ai but renders client-side and its data API is
+    signature-gated, so no certification could be read. NO `Compliance` pointer is emitted in
+    apis.yml — the compliance_published check must read a genuine unknown rather than be credited
+    from an unreadable portal. See security/typesafe-ai-trust-center.yml.
+cross_links:
+  well_known: well-known/typesafe-ai-well-known.yml
+  a2a: a2a/typesafe-ai-a2a.yml
+  mcp: mcp/typesafe-ai-mcp.yml
+  errors: errors/typesafe-ai-problem-types.yml
+  authentication: authentication/typesafe-ai-authentication.yml
+  regulatory: regulatory/typesafe-ai-regulatory-posture.yml
+  trust_center: security/typesafe-ai-trust-center.yml

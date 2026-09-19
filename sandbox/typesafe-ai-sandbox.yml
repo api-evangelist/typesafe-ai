@@ -1,0 +1,85 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.typesafe.ai/introduction/quickstart
+corroboration: https://docs.typesafe.ai/agent-skill
+checked: '2026-09-19'
+summary: >-
+  TypeSafe publishes an interactive Playground in its console — it is the FIRST thing the quickstart
+  tells you to do ("Open the Playground and log in", paste any text as the state, add a question) —
+  and that is the whole of its try-before-you-integrate surface. There is no test mode, no test API
+  key, no sandbox host, no fixture data and no separate test-vs-live key prefix. Every request is a
+  live, billed request against api.typesafe.ai.
+console:
+  name: Playground
+  url: https://console.typesafe.ai/playground
+  authenticated: true
+  probed: {url: 'https://console.typesafe.ai/playground', status: 200, observed: 'redirects to /login?returnTo=%2Fplayground'}
+  capabilities:
+  - Paste arbitrary text as the `state`
+  - Add Noul, Choice and Score questions and mix all three in one call
+  - See every answer at once, with probabilities and confidence
+  quickstart_role: >-
+    Step 1 of the published quickstart, ahead of "Call it: the API". The documented sample state is a
+    support ticket about a failing Stripe connection.
+  source: https://docs.typesafe.ai/introduction/quickstart
+api_keys:
+  console_url: https://console.typesafe.ai/keys
+  probed: {url: 'https://console.typesafe.ai/keys', status: 200, observed: 'redirects to /login?returnTo=%2Fkeys'}
+  env_var: TYPESAFE_API_KEY
+  agent_guidance_published: true
+  agent_guidance_quote: >-
+    "You can also create an API key and give your agent permission to figure out the best way to use
+    TypeSafe by running cheap test queries." — https://docs.typesafe.ai/agent-skill
+  agent_guidance_note: >-
+    TypeSafe's published answer to "how do I experiment safely" is not a sandbox: it is to use a real
+    key and rely on the price being low. That is a coherent position at $0.042 per million input
+    tokens, and it is worth stating plainly because it means an agent's experiments are billed.
+test_mode:
+  available: false
+  test_key_prefix: null
+  live_key_prefix: null
+  prefix_note: 'No key prefix of any kind is published, so test and live keys could not be distinguished even if both existed.'
+  sandbox_host: null
+  sandbox_host_note: 'No sandbox/staging host is documented. Probed api.typesafe.ai only; no sandbox subdomain is referenced anywhere in the docs or llms.txt.'
+test_data:
+  fixtures: []
+  magic_values: []
+  test_identifiers: []
+  note: >-
+    No magic inputs, seeded records, deterministic-response triggers or time-simulation controls —
+    and none would be meaningful here. The API is a stateless evaluation over caller-supplied text,
+    so the caller's own content IS the fixture. There is nothing for a fixture library to stand in
+    for.
+determinism_substitute:
+  note: >-
+    Where a payments API would give you test cards, TypeSafe gives you consistency measurement. The
+    published cookbooks show how to measure the model's self-consistency across repeated identical
+    calls, and a per-version page lists the known weak spots for the current build. That is the
+    closest published analogue to a reproducible test environment.
+  surfaces:
+  - https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook
+  - https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook
+  - https://docs.typesafe.ai/model-jaggedness/jev-1.13
+local_alternative:
+  package: system-one-adapter
+  registry: pypi
+  url: https://pypi.org/project/system-one-adapter/
+  official: true
+  version: 0.2.0
+  published: '2026-09-18'
+  role: >-
+    A first-party drop-in TypeSafeClient replacement backed by ordinary LLM APIs. Not a sandbox, but
+    it is the one published way to run code written against the System One interface WITHOUT a
+    TypeSafe key — useful for local development, CI, and comparing System One against an LLM on the
+    same workload.
+  see: packages/typesafe-ai-packages.yml
+verdict: >-
+  `Sandbox` pointer emitted on the strength of the Playground, which is a real, provider-published,
+  documented interactive console. It is NOT a test environment: an integrator cannot rehearse against
+  fake data or fake keys, and every call — from the Playground, from an SDK, or from an agent — is
+  live and billed.
+cross_links:
+  authentication: authentication/typesafe-ai-authentication.yml
+  plans: plans/typesafe-ai-plans-pricing.yml
+  packages: packages/typesafe-ai-packages.yml
+  conventions: conventions/typesafe-ai-conventions.yml

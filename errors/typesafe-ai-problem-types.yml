@@ -1,0 +1,131 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  https://docs.typesafe.ai/api (Errors table + Handling rate limits) and
+  https://docs.typesafe.ai/sdk/javascript/api (exception classes), derived from the 422 response and
+  HTTPValidationError / ValidationError schemas in openapi/typesafe-ai-openapi.yml.
+checked: '2026-09-19'
+format: fastapi-detail
+rfc9457: false
+rfc9457_note: >-
+  Not RFC 9457. Responses are application/json, never application/problem+json; there is no `type`
+  URI, no `title`, no `instance`. Validation errors use FastAPI's {"detail": [...]} array. An agent
+  cannot dereference an error type here — it must switch on the HTTP status and, for 422, walk
+  detail[].loc to find the offending field.
+media_type: application/json
+envelope:
+  validation:
+    schema: HTTPValidationError
+    shape: '{"detail": [ValidationError, ...]}'
+    entry_fields:
+      loc: 'array of string|integer — the path to the offending field, e.g. ["body","questions","urgency","score","criteria"]'
+      msg: 'string — human-readable message, e.g. "Field required"'
+      type: 'string — machine error class, e.g. "missing"'
+      input: 'any (optional) — the value that failed, e.g. {"type": "score"}'
+      ctx: 'object (optional) — constraint context, e.g. {"min_length": 1}'
+    source: openapi/typesafe-ai-openapi.yml
+    in_spec_example: '[{"loc": ["body", "state"], "msg": "Field required", "type": "missing"}]'
+  other_statuses:
+    documented_shape: false
+    note: >-
+      The 401 / 429 / 529 bodies are not described in the spec or the docs beyond "a JSON body
+      describing what went wrong". Only the 422 body has a declared schema.
+problem_types:
+- status: 401
+  name: Unauthorized
+  meaning: Missing or invalid API key. Check the Authorization header.
+  retryable: false
+  remediation: >-
+    Set Authorization: Bearer <API_KEY>. Both SDKs read TYPESAFE_API_KEY from the environment; create
+    a key at https://console.typesafe.ai/keys.
+  sdk_exception: AuthenticationError
+  method: searched
+  source: https://docs.typesafe.ai/api
+- status: 422
+  name: Unprocessable Entity
+  meaning: >-
+    The request body failed validation — for example a missing required field or a malformed
+    question. The body details the offending field.
+  retryable: false
+  retryable_note: 'Not retryable as sent. Fix the body first; a replay of the same payload fails identically.'
+  remediation: >-
+    Read detail[].loc to locate the field and detail[].type for the failure class. Common causes in
+    this API: a Score question with fewer than two criteria levels (ctx.min_length 1), a Choice
+    question with no criteria map, or a missing `state` / `model` / `questions` key.
+  schema: HTTPValidationError
+  sdk_exception: UnprocessableEntityError
+  method: derived
+  source: openapi/typesafe-ai-openapi.yml
+  declared_on: [systemone_v1_systemone_post, models_v1_v1_models_get]
+  declared_note: >-
+    The spec declares 422 on BOTH operations, including GET /v1/models, which takes no parameters —
+    a FastAPI artefact rather than a reachable condition.
+- status: 429
+  name: Too Many Requests
+  meaning: You have exceeded your rate limit. Back off and retry after a short delay.
+  retryable: true
+  retry_strategy: >-
+    Exponential backoff, not immediate retry. Honour `retry-after` when the response carries it (it
+    is not guaranteed). Two published limits can trigger this: 250,000 tokens per second and 1,200
+    requests per minute.
+  sdk_exception: RateLimitError
+  sdk_handled: true
+  method: searched
+  source: https://docs.typesafe.ai/api#handling-rate-limits
+- status: 529
+  name: Overloaded
+  meaning: TypeSafe is temporarily overloaded. Retry after a short delay.
+  retryable: true
+  retry_strategy: Exponential backoff, same as 429.
+  nonstandard: true
+  nonstandard_note: >-
+    529 is not in the IANA HTTP status registry. Client code that enumerates known statuses will not
+    recognise it, and some HTTP stacks and proxies treat unknown 5xx codes as non-retryable by
+    default. A direct HTTP caller must add 529 to its retryable set explicitly; the official SDKs
+    already do.
+  method: searched
+  source: https://docs.typesafe.ai/api
+client_exception_hierarchy:
+  source: https://docs.typesafe.ai/sdk/javascript/api
+  note: >-
+    The JavaScript SDK publishes a typed exception hierarchy, which is the richest error taxonomy
+    TypeSafe documents anywhere — richer than the HTTP table above, and the practical error contract
+    for most callers.
+  classes:
+  - TypeSafeError
+  - APIError
+  - APIConnectionError
+  - APITimeoutError
+  - APIUserAbortError
+  - AuthenticationError
+  - BadRequestError
+  - InternalServerError
+  - NotFoundError
+  - PermissionDeniedError
+  - RateLimitError
+  - UnprocessableEntityError
+  gap_note: >-
+    BadRequestError (400), NotFoundError (404), PermissionDeniedError (403) and InternalServerError
+    (5xx) exist in the SDK but appear in NO published server-side error table and in no spec
+    response, so the statuses the API can actually return are broader than the four it documents.
+observed:
+- url: https://api.typesafe.ai/
+  status: 404
+  body: '{"detail":"Not Found"}'
+  note: >-
+    Live unauthenticated probe. Confirms the FastAPI `detail` envelope is what the server actually
+    emits, and confirms 404 is reachable despite being undocumented.
+- url: https://api.typesafe.ai/v1/models
+  status: not-probed
+  note: >-
+    Not probed without a credential. The pipeline does not send unauthenticated requests to billed
+    endpoints beyond what is needed to establish the error envelope.
+coverage:
+  statuses_documented: 4
+  statuses_in_spec: 2
+  statuses_with_declared_body_schema: 1
+cross_links:
+  conventions: conventions/typesafe-ai-conventions.yml
+  rate_limits: rate-limits/typesafe-ai-rate-limits.yml
+  authentication: authentication/typesafe-ai-authentication.yml
+  overlay: overlays/typesafe-ai-openapi-overlay.yaml

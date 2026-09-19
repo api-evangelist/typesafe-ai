@@ -1,0 +1,103 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.typesafe.ai/models
+corroboration: https://docs.typesafe.ai/api#handling-rate-limits
+checked: '2026-09-19'
+summary: >-
+  TypeSafe publishes hard numbers — 250,000 tokens per second and 1,200 requests per minute — on its
+  Models page, attached to the model rather than to a plan. It also publishes, in the same breath,
+  that those numbers can change without notice while it scales. That warning is the most important
+  field in this file: an integrator can read the limit but cannot rely on it, and no response header
+  is documented that would let a client discover the current value at runtime.
+limit_count: 2
+scopes:
+- scope: per-account
+  surface: 'POST /v1/systemone (api.typesafe.ai), model jev-1.13'
+  window: 1 second
+  limit: 250000
+  unit: tokens
+  burst: null
+  status_on_exhaustion: 429
+  source: https://docs.typesafe.ai/models
+- scope: per-account
+  surface: 'POST /v1/systemone (api.typesafe.ai), model jev-1.13'
+  window: 1 minute
+  limit: 1200
+  unit: requests
+  burst: null
+  status_on_exhaustion: 429
+  source: https://docs.typesafe.ai/models
+  note: 'Either limit alone triggers 429 — the docs say "A request over either limit returns 429 Too Many Requests".'
+headers:
+  documented: partial
+  response_headers:
+  - name: retry-after
+    presence: conditional
+    meaning: Seconds to wait before retrying.
+    quote: >-
+      "Our client SDKs retry with backoff by default and honor the `retry-after` header when the
+      response carries one."
+    note: >-
+      The phrase "when the response carries one" is the provider's own admission that the header is
+      not always sent. A client must implement backoff that works without it.
+  absent:
+  - X-RateLimit-Limit
+  - X-RateLimit-Remaining
+  - X-RateLimit-Reset
+  - RateLimit
+  - RateLimit-Policy
+  absent_note: >-
+    No RFC 9238-style RateLimit fields and no X-RateLimit-* family is documented. There is no runtime
+    signal for remaining quota, so a client cannot pace itself — it can only react to a 429 after the
+    fact. Combined with the volatility warning below, this is the weakest part of TypeSafe's runtime
+    contract for an autonomous caller.
+  observation_note: >-
+    Headers could not be observed live. An unauthenticated GET of https://api.typesafe.ai/ returns
+    404 with no rate-limit headers, and the pipeline does not send authenticated or billed requests.
+    Everything above is `searched` from the provider's own documentation.
+statuses:
+  rate_limited: 429
+  overloaded: 529
+  overloaded_note: >-
+    529 Overloaded is a separate, provider-side condition — capacity, not the caller's quota. Same
+    retry strategy, different cause, and it is a non-standard status. See errors/.
+volatility:
+  limits_stable: false
+  provider_warning_verbatim: >-
+    "Rate limits are adjusting dynamically. We are serving a very large volume of demand, and the
+    limits above can change without notice while we do, as upcoming large GPU deals land and we let
+    in more users. Once things settle down more, we'll be able to offer more stable limits. Higher
+    limits are available on custom and enterprise plans."
+  source: https://docs.typesafe.ai/models
+  implication: >-
+    Capacity planning against these numbers is not safe today. The published values are a snapshot
+    of an early-access service, and TypeSafe says so itself. Re-read the Models page before relying
+    on them.
+context_limits:
+  note: >-
+    Not rate limits, but the other published ceiling a caller hits — recorded here because a request
+    that exceeds them fails rather than throttles.
+  total_tokens_per_request: 64000
+  total_scope: state plus all questions combined
+  single_question_tokens: 32000
+  single_scope: state plus the single longest question
+  source: https://docs.typesafe.ai/models
+higher_limits:
+  available: true
+  route: 'Custom and enterprise plans — contact sales@typesafe.ai.'
+  published_values: false
+  see: plans/typesafe-ai-plans-pricing.yml
+evidence:
+- url: https://docs.typesafe.ai/models
+  status: 200
+  observed: 'Rate limits row: "250,000 tokens per second / 1,200 requests per minute"; dynamic-adjustment warning.'
+- url: https://docs.typesafe.ai/api
+  status: 200
+  observed: '429 and 529 rows in the Errors table plus the "Handling rate limits" section.'
+- url: https://api.typesafe.ai/
+  status: 404
+  observed: '{"detail":"Not Found"} with no rate-limit response headers.'
+cross_links:
+  conventions: conventions/typesafe-ai-conventions.yml
+  errors: errors/typesafe-ai-problem-types.yml
+  plans: plans/typesafe-ai-plans-pricing.yml

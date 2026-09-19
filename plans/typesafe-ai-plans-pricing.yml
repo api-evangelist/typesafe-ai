@@ -1,0 +1,84 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.typesafe.ai/models
+corroboration: https://typesafe.ai/
+checked: '2026-09-19'
+summary: >-
+  TypeSafe publishes NO plans and NO pricing page — typesafe.ai/pricing and docs.typesafe.ai/pricing
+  both 404, and the site has no pricing route in its sitemap. What it does publish is a single,
+  specific usage price attached to the model rather than to a tier: $42 per billion input tokens
+  ($0.042 per million), output tokens free. That is unusually concrete for a company in early access,
+  and it is stated twice — on the Models page and on the marketing homepage. Everything beyond that
+  one rate is a sales conversation: higher rate limits and zero data retention are both described as
+  available on "custom and enterprise plans" with no structure, no names, and no prices.
+plan_count: 0
+plan_count_basis: >-
+  Zero NAMED, purchasable tiers are published anywhere. This is not an absent pricing page with tiers
+  behind it — there is no pricing page at all, and no tier names appear in the docs, the sitemap, or
+  the marketing site. Recorded as 0 rather than omitted, per the pipeline rule that an honest zero is
+  data.
+plans: []
+usage_pricing:
+  published: true
+  model: jev-1.13.0
+  unit: input token
+  price_per_billion_input_tokens: 42.00
+  price_per_million_input_tokens: 0.042
+  currency: USD
+  output_tokens: free
+  output_tokens_quote: 'Charged per input token. Output tokens are free.'
+  billing_period: not-published
+  free_tier: not-published
+  free_credits: not-published
+  minimum_spend: not-published
+  source: https://docs.typesafe.ai/models
+  marketing_corroboration:
+    quote: '$42 Per Billion input tokens. 238x Lower input price than Claude Fable 5.1'
+    url: https://typesafe.ai/
+    note: >-
+      The homepage repeats the same rate and frames it as a comparison against a frontier LLM. The
+      comparative claim is the provider's, recorded verbatim and not verified here.
+  terminology_note: >-
+    TypeSafe prices per BILLION tokens (Btok) as the headline unit, which is a deliberate framing
+    choice — the same rate is $0.042 per million, roughly two orders of magnitude below
+    general-purpose LLM input pricing. Both units are published; the per-Mtok figure is the one that
+    compares directly to every other inference vendor.
+enterprise:
+  available: true
+  contact: sales@typesafe.ai
+  offers:
+  - Higher rate limits than the published 250,000 tokens/sec and 1,200 req/min
+  - Zero data retention (ZDR) — contact privacy@typesafe.ai
+  published_values: false
+  source: https://docs.typesafe.ai/models
+access_gate:
+  self_serve_signup: gated
+  detail: >-
+    Jev is described as early access and the marketing site's primary call to action is "Join
+    Waitlist". console.typesafe.ai redirects every path to /login, including /signup, so whether an
+    account can be created without an invitation could not be established from outside. A key is
+    created at https://console.typesafe.ai/keys once an account exists.
+  evidence:
+  - {url: 'https://console.typesafe.ai/signup', status: 200, observed: 'redirects to /login?returnTo=%2Fsignup'}
+  - {url: 'https://console.typesafe.ai/login', status: 200, observed: 'Passwordless page — "Welcome to TypeSafe", Continue with Google or an emailed code. It is both the sign-in and the sign-up affordance; there is no separate registration form and no password. Whether a new Google account is accepted without a waitlist invitation was NOT tested.'}
+  - {url: 'https://typesafe.ai/', status: 200, observed: '"Join Waitlist" call to action; "Try our first System One Model, Jev, in early access."'}
+probes:
+- url: https://typesafe.ai/pricing
+  status: 404
+- url: https://docs.typesafe.ai/pricing
+  status: 404
+- url: https://typesafe.ai/enterprise
+  status: 404
+  note: 'The site nav shows an "Enterprise" item, but no /enterprise route exists and it is absent from sitemap.xml — a JS-driven contact action rather than a page.'
+- url: https://typesafe.ai/sitemap.xml
+  status: 200
+  observed: '12 URLs — home, team, manifesto, 4 legal, 5 blog posts. No pricing, no plans.'
+buyer_note: >-
+  A buyer CAN cost a workload here, which is more than most early-access AI labs allow: the input
+  price is published, output is free, and the token ceilings per request are documented. What a buyer
+  cannot do is find out what an account costs to open, whether there is a free allowance, how billing
+  is periodised, or what an enterprise tier includes.
+cross_links:
+  rate_limits: rate-limits/typesafe-ai-rate-limits.yml
+  conventions: conventions/typesafe-ai-conventions.yml
+  lifecycle: lifecycle/typesafe-ai-lifecycle.yml

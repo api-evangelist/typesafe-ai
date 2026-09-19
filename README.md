@@ -64,5 +64,35 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-TypeSafe AI is a company added to the API Evangelist network by direct request for full-pipeline profiling.
-- https://typesafe.ai/
+TypeSafe AI is a San Francisco AI lab building **System One models** — a class of model trained to
+return typed, calibrated decisions for software rather than generated text. Its flagship and first
+System One model, **Jev**, is served by a single HTTP endpoint: `POST /v1/systemone` takes a `state`
+plus a map of typed questions and returns one structured answer per question, each carrying
+probabilities and (for Choice and Score) a confidence value.
+
+- Website: https://typesafe.ai/
+- Docs: https://docs.typesafe.ai/
+- API reference: https://docs.typesafe.ai/api
+- OpenAPI 3.1.0 (provider-served): https://api.typesafe.ai/openapi.json
+
+## What this profile holds
+
+Profiled 2026-09-19. Every artifact below was searched, probed or derived from public surfaces —
+see each file's `method:` and `source:` frontmatter.
+
+| Surface | Where |
+|---|---|
+| OpenAPI 3.1.0 (2 operations, 16 schemas) | `openapi/` — verbatim original in `openapi/_original/` |
+| Proposed spec enhancements (servers, applied security, tags, documented failure responses) | `overlays/` |
+| A2A agent card — served, **conformant** | `a2a/` |
+| Hosted MCP server — live, anonymous, docs-scoped | `mcp/` |
+| MCP ↔ REST tool crosswalk (zero overlap: the finding) | `mcp/` |
+| Agent Skills — two provider-published, saved verbatim, plus two generated | `skills/` |
+| llms.txt (provider-published, ~110 entries) | `llms/` |
+| `/.well-known/` probe across 5 hosts — security.txt + agent card | `well-known/` |
+| Official SDKs — Python `typesafe-sdk`, TypeScript `@typesafe-ai/sdk` | `packages/` |
+| Auth (static bearer API key), conventions, errors, data model, examples | `authentication/`, `conventions/`, `errors/`, `data-model/`, `examples/` |
+| Published rate limits, usage price, status page, SDK changelogs | `rate-limits/`, `plans/`, `lifecycle/`, `changelog/` |
+| Domain security, vulnerability disclosure, trust center | `security/` |
+| Horizontal regulatory posture (DPA, residency, incident window, AI transparency) | `regulatory/` |
+| Standards conformance, including what is **not** conformant | `conformance/` |

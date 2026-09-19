@@ -1,0 +1,92 @@
+generated: '2026-09-19'
+method: derived
+source: >-
+  openapi/typesafe-ai-openapi.yml — the 16 components.schemas of the served OpenAPI 3.1.0, their
+  $ref links and their discriminating `type` fields. Enriched from https://docs.typesafe.ai/api and
+  https://docs.typesafe.ai/primitives.
+docs: https://docs.typesafe.ai/api
+notation: >-
+  This API has NO persisted entities — no ids, no URNs, no resources to fetch later. The "data model"
+  is a request/response type graph: a tagged union of three question shapes in, a tagged union of
+  three matching answer shapes out, keyed by caller-chosen names. Relationships below are composition
+  (has_one / has_many / discriminates), never foreign-key references, because there are no keys.
+shape: request-response-type-graph
+persistence: none
+persistence_note: >-
+  Recorded explicitly because it drives several other artifacts: no persistence is why idempotency
+  and reversibility are `na` in conventions/, why there is no pagination, and why there is nothing
+  for a data-subject request to reach on the API side.
+keying:
+  mechanism: caller-chosen question ids
+  detail: >-
+    The caller names every question; the answer comes back under the same name. The id is the only
+    correlation primitive in the API and it is documented as NOT reaching the model: "The key is not
+    sent to the underlying model and is not used in inference."
+  cardinality: 'One answer per question, guaranteed by construction.'
+entities:
+- {name: SystemOneRequest, kind: request-root, schema: SystemOneRequest, domain: core, description: 'The whole request — state, model, and the questions map.'}
+- {name: SystemOneResponse, kind: response-root, schema: SystemOneResponse, domain: core, description: 'The whole response — model, answers map, and usage.'}
+- {name: Question, kind: union, schema: Question, domain: questions, description: 'Tagged union over the three question types, discriminated by `type`.'}
+- {name: NoulQuestion, kind: variant, schema: NoulQuestion, domain: questions, discriminator: 'type = "noul"', description: 'A yes/no question. instructions (string|object|array) plus optional NoulCriteria.'}
+- {name: ChoiceQuestion, kind: variant, schema: ChoiceQuestion, domain: questions, discriminator: 'type = "choice"', description: 'Pick one option from a caller-defined set. criteria is a map<option, description|null>.'}
+- {name: ScoreQuestion, kind: variant, schema: ScoreQuestion, domain: questions, discriminator: 'type = "score"', description: 'Rate against ordered rubric levels. criteria is an ORDERED ARRAY of level descriptions, minimum two.'}
+- {name: NoulCriteria, kind: value-object, schema: NoulCriteria, domain: questions, description: 'Optional {true, false} descriptions of what a yes and a no mean.'}
+- {name: Answer, kind: union, schema: Answer, domain: answers, description: 'Tagged union over the three answer types, discriminated by `type` and matching its question.'}
+- {name: NoulAnswer, kind: variant, schema: NoulAnswer, domain: answers, discriminator: 'type = "noul"', description: 'Carries `noul`: a number 0 (no) to 1 (yes). NO confidence field.'}
+- {name: ChoiceAnswer, kind: variant, schema: ChoiceAnswer, domain: answers, discriminator: 'type = "choice"', description: 'Carries `choice` (the highest-probability option), `probabilities` (map<option, float> summing to 1) and `confidence`.'}
+- {name: ScoreAnswer, kind: variant, schema: ScoreAnswer, domain: answers, discriminator: 'type = "score"', description: 'Carries `score` (probability-weighted, can land between levels), `legend` (map<level, description>), `probabilities` (map<level, float>) and `confidence`.'}
+- {name: Usage, kind: value-object, schema: Usage, domain: billing, description: '{input_tokens, output_tokens}. Input tokens are the billed quantity; output tokens are free.'}
+- {name: ModelMetadata, kind: entity, schema: ModelMetadata, domain: models, description: 'A model or alias — {name, description, release_date}. The one list-shaped thing in the API.'}
+- {name: ModelMetadataList, kind: collection, schema: ModelMetadataList, domain: models, description: '{models: [ModelMetadata]} — the GET /v1/models response.'}
+- {name: HTTPValidationError, kind: error, schema: HTTPValidationError, domain: errors, description: '{detail: [ValidationError]} — the FastAPI 422 envelope.'}
+- {name: ValidationError, kind: error, schema: ValidationError, domain: errors, description: '{loc[], msg, type, input?, ctx?} — one field-level failure.'}
+relationships:
+- {from: SystemOneRequest, to: Question, type: has_many, via: questions, keyed_by: caller-chosen string}
+- {from: SystemOneResponse, to: Answer, type: has_many, via: answers, keyed_by: the same caller-chosen string}
+- {from: SystemOneResponse, to: Usage, type: has_one, via: usage}
+- {from: Question, to: NoulQuestion, type: discriminates, via: 'type = "noul"'}
+- {from: Question, to: ChoiceQuestion, type: discriminates, via: 'type = "choice"'}
+- {from: Question, to: ScoreQuestion, type: discriminates, via: 'type = "score"'}
+- {from: NoulQuestion, to: NoulCriteria, type: has_one, via: criteria, optional: true}
+- {from: Answer, to: NoulAnswer, type: discriminates, via: 'type = "noul"'}
+- {from: Answer, to: ChoiceAnswer, type: discriminates, via: 'type = "choice"'}
+- {from: Answer, to: ScoreAnswer, type: discriminates, via: 'type = "score"'}
+- {from: ModelMetadataList, to: ModelMetadata, type: has_many, via: models}
+- {from: HTTPValidationError, to: ValidationError, type: has_many, via: detail}
+- {from: NoulQuestion, to: NoulAnswer, type: pairs_with, via: 'the shared question id and matching `type`'}
+- {from: ChoiceQuestion, to: ChoiceAnswer, type: pairs_with, via: 'the shared question id and matching `type`'}
+- {from: ScoreQuestion, to: ScoreAnswer, type: pairs_with, via: 'the shared question id and matching `type`'}
+type_asymmetries:
+- finding: 'criteria has three different shapes across the three question types.'
+  detail: >-
+    Noul criteria is an OBJECT ({true, false}) and optional; Choice criteria is a MAP of option to
+    description and REQUIRED; Score criteria is an ORDERED ARRAY of at least two levels and REQUIRED.
+    A client that writes one generic criteria handler will break on at least one type.
+- finding: 'confidence is present on Choice and Score answers and ABSENT on Noul answers.'
+  detail: >-
+    A Noul returns the probability itself (`noul`, 0–1) rather than a separate confidence. Code that
+    reads answer.confidence uniformly will read undefined for every Noul.
+- finding: '`instructions` accepts string, object OR array on every question type.'
+  detail: >-
+    Documented as deliberate ("Instructions, Choice options, Score levels, and Noul criteria all
+    accept JSON structure"), so a client cannot assume a string.
+- finding: 'Score.criteria was a dict keyed by integers before 2026-09-15.'
+  detail: >-
+    Both SDKs changed it to an ordered sequence in their 0.6.0 releases on the same day. The current
+    spec agrees with the new shape; nothing on the server side records the change. See changelog/.
+identifiers:
+  server_assigned: []
+  server_assigned_note: 'None. The API returns no id of any kind — no request id, no answer id, no resource id.'
+  client_assigned: [question id]
+  model_identifiers:
+    versioned: 'jev-1.13.0'
+    aliases: [jev-latest, jev-preview]
+    echoed_back: 'SystemOneResponse.model reports the versioned ID that actually answered.'
+schema_count: 16
+operation_count: 2
+cross_links:
+  openapi: openapi/typesafe-ai-openapi.yml
+  examples: examples/typesafe-ai-examples.yml
+  conventions: conventions/typesafe-ai-conventions.yml
+  errors: errors/typesafe-ai-problem-types.yml
+  changelog: changelog/typesafe-ai-changelog.yml

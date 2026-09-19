@@ -1,0 +1,34 @@
+generated: '2026-09-19'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: typesafe.ai
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 23 00:21:18 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+- host: docs.typesafe.ai
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Dec 10 21:23:48 2026 GMT
+  hsts: true
+  hsts_max_age: 63072000
+- host: api.typesafe.ai
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Dec 14 18:42:46 2026 GMT
+  hsts: null
+domains:
+- domain: typesafe.ai
+  dnssec: true
+  caa:
+  - 0 issuewild "pki.goog; cansignhttpexchanges=yes"
+  - 0 issuewild "ssl.com"
+  - 0 issue "comodoca.com"
+  - 0 issue "digicert.com; cansignhttpexchanges=yes"
+  - 0 issue "letsencrypt.org"
+  - 0 issue "pki.goog; cansignhttpexchanges=yes"
+  spf: true
+  dmarc: true
+  dmarc_policy: none
