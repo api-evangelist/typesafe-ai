@@ -25,7 +25,7 @@ created: '2026-09-19'
 modified: '2026-09-19'
 tags:
 - Artificial Intelligence
-- Machine Learning
+- Machine-Learning
 - Classification
 - Content Moderation
 - Decision Support
@@ -49,6 +49,7 @@ tags_raw:
 - mcp
 - agent-native
 - developer-tools
+- Machine Learning
 apis:
 - aid: typesafe-ai:system-one-api
   name: TypeSafe System One API
@@ -63,7 +64,7 @@ apis:
   baseURL: https://api.typesafe.ai
   tags:
   - Artificial Intelligence
-  - Machine Learning
+  - Machine-Learning
   - Classification
   - Content Moderation
   - Decision Support
@@ -77,6 +78,7 @@ apis:
   - decision-support
   - structured-outputs
   - inference
+  - Machine Learning
   properties:
   - type: OpenAPI
     url: openapi/typesafe-ai-openapi.yml
