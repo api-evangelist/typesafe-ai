@@ -25,7 +25,7 @@ created: '2026-09-19'
 modified: '2026-09-19'
 tags:
 - Artificial Intelligence
-- Machine-Learning
+- Machine Learning
 - Classification
 - Content Moderation
 - Decision Support
@@ -34,8 +34,9 @@ tags:
 - LLM Alternative
 - Agent Skills
 - MCP
-- agent-native
+- Agent-Native
 - Developer Tools
+- A2A
 tags_raw:
 - artificial-intelligence
 - machine-learning
@@ -50,41 +51,47 @@ tags_raw:
 - agent-native
 - developer-tools
 - Machine Learning
+- Machine-Learning
+- A2A
 apis:
-- aid: typesafe-ai:system-one-api
-  name: TypeSafe System One API
+- aid: typesafe-ai:docs-mcp
+  name: TypeSafe AI Documentation MCP Server
   description: >-
-    The TypeSafe System One HTTP API. POST /v1/systemone evaluates a `state` against a map of typed
-    Noul / Choice / Score questions and returns one calibrated answer per question with
-    probabilities, confidence and token usage; GET /v1/models lists the model names and aliases the
-    calling account may send. Authentication is a bearer API key in the Authorization header.
-    OpenAPI 3.1.0 is served anonymously at https://api.typesafe.ai/openapi.json with a ReDoc
-    renderer at /redoc.
+    Hosted, anonymous, read-mostly MCP server over the published TypeSafe documentation corpus. Three
+    tools: search_type_safe_ai (knowledge-base search), query_docs_filesystem_type_safe_ai (read-only
+    rg/tree/head over a virtualised in-memory filesystem of the docs) and submit_feedback (the one write,
+    reporting a documentation defect). It does NOT expose the System One evaluation endpoint — an agent
+    can read everything about Jev over MCP and call none of it.
+  humanURL: https://docs.typesafe.ai/introduction
+  baseURL: https://docs.typesafe.ai/mcp
+  tags:
+  - MCP
+  - Agent-Native
+  - Developer Tools
+  tags_raw:
+  - mcp
+  - agent-native
+  - developer-tools
+  properties:
+  - type: MCPServer
+    url: mcp/typesafe-ai-mcp.yml
+  - type: MCPServer
+    name: MCP endpoint (provider-hosted)
+    url: https://docs.typesafe.ai/mcp
+  - type: ToolCrosswalk
+    url: mcp/typesafe-ai-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.typesafe.ai/agent-skill
+- aid: typesafe-ai:typesafe-ai-models-api
+  name: TypeSafe AI Models API
+  description: The Models API from TypeSafe AI — 1 operation(s) for models.
   humanURL: https://docs.typesafe.ai/api
   baseURL: https://api.typesafe.ai
   tags:
-  - Artificial Intelligence
-  - Machine-Learning
-  - Classification
-  - Content Moderation
-  - Decision Support
-  - Structured Outputs
-  - Inference
-  tags_raw:
-  - artificial-intelligence
-  - machine-learning
-  - classification
-  - content-moderation
-  - decision-support
-  - structured-outputs
-  - inference
-  - Machine Learning
+  - Models
   properties:
   - type: OpenAPI
-    url: openapi/typesafe-ai-openapi.yml
-  - type: OpenAPI
-    name: OpenAPI (provider-hosted)
-    url: https://api.typesafe.ai/openapi.json
+    url: openapi/typesafe-ai-models-api-openapi.yml
   - type: Documentation
     url: https://docs.typesafe.ai/introduction
   - type: APIReference
@@ -101,38 +108,36 @@ apis:
     url: data-model/typesafe-ai-data-model.yml
   - type: Examples
     url: examples/typesafe-ai-examples.yml
-  - type: Overlay
-    url: overlays/typesafe-ai-openapi-overlay.yaml
   - type: RateLimits
     url: rate-limits/typesafe-ai-rate-limits.yml
-- aid: typesafe-ai:docs-mcp
-  name: TypeSafe AI Documentation MCP Server
-  description: >-
-    Hosted, anonymous, read-mostly MCP server over the published TypeSafe documentation corpus.
-    Three tools: search_type_safe_ai (knowledge-base search), query_docs_filesystem_type_safe_ai
-    (read-only rg/tree/head over a virtualised in-memory filesystem of the docs) and
-    submit_feedback (the one write, reporting a documentation defect). It does NOT expose the System
-    One evaluation endpoint — an agent can read everything about Jev over MCP and call none of it.
-  humanURL: https://docs.typesafe.ai/introduction
-  baseURL: https://docs.typesafe.ai/mcp
+- aid: typesafe-ai:typesafe-ai-systemone-api
+  name: TypeSafe AI Systemone API
+  description: The Systemone API from TypeSafe AI — 1 operation(s) for systemone.
+  humanURL: https://docs.typesafe.ai/api
+  baseURL: https://api.typesafe.ai
   tags:
-  - MCP
-  - agent-native
-  - Developer Tools
-  tags_raw:
-  - mcp
-  - agent-native
-  - developer-tools
+  - Systemone
   properties:
-  - type: MCPServer
-    url: mcp/typesafe-ai-mcp.yml
-  - type: MCPServer
-    name: MCP endpoint (provider-hosted)
-    url: https://docs.typesafe.ai/mcp
-  - type: ToolCrosswalk
-    url: mcp/typesafe-ai-tool-crosswalk.yml
+  - type: OpenAPI
+    url: openapi/typesafe-ai-systemone-api-openapi.yml
   - type: Documentation
-    url: https://docs.typesafe.ai/agent-skill
+    url: https://docs.typesafe.ai/introduction
+  - type: APIReference
+    url: https://docs.typesafe.ai/api
+  - type: GettingStarted
+    url: https://docs.typesafe.ai/introduction/quickstart
+  - type: Authentication
+    url: authentication/typesafe-ai-authentication.yml
+  - type: Conventions
+    url: conventions/typesafe-ai-conventions.yml
+  - type: ErrorCatalog
+    url: errors/typesafe-ai-problem-types.yml
+  - type: DataModel
+    url: data-model/typesafe-ai-data-model.yml
+  - type: Examples
+    url: examples/typesafe-ai-examples.yml
+  - type: RateLimits
+    url: rate-limits/typesafe-ai-rate-limits.yml
 common:
 - type: VulnerabilityDisclosure
   url: security/typesafe-ai-vulnerability-disclosure.yml
@@ -253,3 +258,10 @@ x-coverage:
     - url: https://docs.typesafe.ai/mcp
       status: 200
   checked: '2026-09-19'
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://docs.typesafe.ai/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "0.3"
+  control: 404

@@ -1,0 +1,33 @@
+{
+  "provider": "typesafe-ai",
+  "sources": [
+    "_original/typesafe-ai-openapi.json",
+    "typesafe-ai-openapi.yml"
+  ],
+  "outputs": [
+    "typesafe-ai-models-api-openapi.yml",
+    "typesafe-ai-systemone-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/typesafe-ai-openapi.yml"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "typesafe-ai-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "typesafe-ai-openapi.json: tagged paths POST /v1/systemone -> Systemone",
+    "typesafe-ai-openapi.json: tagged paths GET /v1/models -> Models",
+    "typesafe-ai-openapi.json: declared missing tag: Models",
+    "typesafe-ai-openapi.json: declared missing tag: Systemone",
+    "typesafe-ai-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "typesafe-ai-openapi.yml: tagged paths POST /v1/systemone -> Systemone",
+    "typesafe-ai-openapi.yml: tagged paths GET /v1/models -> Models",
+    "typesafe-ai-openapi.yml: declared missing tag: Models",
+    "typesafe-ai-openapi.yml: declared missing tag: Systemone",
+    "tag 'Models' spans 2 source specs (typesafe-ai-openapi.json, typesafe-ai-openapi.yml): per-path servers applied",
+    "tag 'Systemone' spans 2 source specs (typesafe-ai-openapi.json, typesafe-ai-openapi.yml): per-path servers applied",
+    "apis.yml register: written (+2 apis, 3 total)"
+  ],
+  "skipped": []
+}
