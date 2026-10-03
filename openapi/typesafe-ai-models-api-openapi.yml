@@ -1,11 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Typesafe Ai Models API
+  title: TypeSafe Models API
+  description: Ask yes/no questions, evaluate statements, select choices, or assign ratings to your content. Send your API key in the Authorization header as `Bearer `. Use GET /v1/models to discover available model names.
   version: 0.2.0
-  description: 'Operations tagged Models across 2 of this provider''s published API definitions: typesafe-ai-openapi.json, typesafe-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
-servers:
-- url: https://api.typesafe.ai
-  description: TypeSafe System One API production host, as published in the API reference (POST https://api.typesafe.ai/v1/systemone).
 tags:
 - name: Models
 paths:
@@ -36,6 +33,33 @@ paths:
       - Models
 components:
   schemas:
+    ModelMetadata:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Model name or alias accepted by the request's model field.
+          examples:
+          - jev-latest
+        description:
+          type: string
+          title: Description
+          description: Human-readable description of the model and its capabilities.
+          examples:
+          - General-purpose system one model.
+        release_date:
+          type: string
+          title: Release Date
+          description: Model release date, formatted as YYYY-MM-DD.
+          examples:
+          - '2026-09-15'
+      type: object
+      required:
+      - name
+      - description
+      - release_date
+      title: ModelMetadata
+      description: A model or model alias available to the authenticated account.
     HTTPValidationError:
       properties:
         detail:
@@ -116,37 +140,7 @@ components:
       - models
       title: ModelMetadataList
       description: Models and aliases available to the authenticated account.
-    ModelMetadata:
-      properties:
-        name:
-          type: string
-          title: Name
-          description: Model name or alias accepted by the request's model field.
-          examples:
-          - jev-latest
-        description:
-          type: string
-          title: Description
-          description: Human-readable description of the model and its capabilities.
-          examples:
-          - General-purpose system one model.
-        release_date:
-          type: string
-          title: Release Date
-          description: Model release date, formatted as YYYY-MM-DD.
-          examples:
-          - '2026-09-15'
-      type: object
-      required:
-      - name
-      - description
-      - release_date
-      title: ModelMetadata
-      description: A model or model alias available to the authenticated account.
   securitySchemes:
     HTTPBearer:
       type: http
       scheme: bearer
-x-refined-from:
-- typesafe-ai-openapi.json
-- typesafe-ai-openapi.yml
