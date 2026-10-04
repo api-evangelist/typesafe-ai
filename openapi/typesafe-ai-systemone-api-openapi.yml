@@ -43,6 +43,106 @@ paths:
       - Systemone
 components:
   schemas:
+    NoulCriteria:
+      properties:
+        'true':
+          anyOf:
+          - type: string
+          - additionalProperties: true
+            type: object
+          - items: {}
+            type: array
+          - type: 'null'
+          title: 'True'
+          description: What counts as a yes answer.
+          examples:
+          - The message is unsolicited advertising.
+        'false':
+          anyOf:
+          - type: string
+          - additionalProperties: true
+            type: object
+          - items: {}
+            type: array
+          - type: 'null'
+          title: 'False'
+          description: What counts as a no answer.
+          examples:
+          - The message is a legitimate conversation.
+      type: object
+      title: NoulCriteria
+      description: Criteria defining what counts as a yes or no answer.
+    Question:
+      oneOf:
+      - $ref: '#/components/schemas/NoulQuestion'
+      - $ref: '#/components/schemas/ChoiceQuestion'
+      - $ref: '#/components/schemas/ScoreQuestion'
+      description: A question about the supplied content.
+      discriminator:
+        propertyName: type
+        mapping:
+          choice: '#/components/schemas/ChoiceQuestion'
+          noul: '#/components/schemas/NoulQuestion'
+          score: '#/components/schemas/ScoreQuestion'
+    ChoiceAnswer:
+      properties:
+        type:
+          type: string
+          const: choice
+          title: Type
+          description: Identifies a selection from the requested choices.
+          examples:
+          - choice
+        choice:
+          type: string
+          title: Choice
+          description: The name of the choice with the highest probability among the question's criteria.
+          examples:
+          - angry
+        confidence:
+          type: number
+          title: Confidence
+          description: Confidence in the selected choice, from 0 to 1. Higher values indicate greater certainty; use lower values to flag uncertain selections for review.
+          examples:
+          - 0.9
+        probabilities:
+          additionalProperties:
+            type: number
+          type: object
+          title: Probabilities
+          description: Probability of each choice in criteria, keyed by choice name, from 0 to 1. Shows how likely the alternatives are; values sum to approximately 1.
+          examples:
+          - angry: 0.8
+            calm: 0.1
+            excited: 0.1
+      type: object
+      required:
+      - choice
+      - confidence
+      - probabilities
+      - type
+      title: ChoiceAnswer
+      description: The selected choice, confidence, and probabilities for a choice question.
+    Usage:
+      properties:
+        input_tokens:
+          type: integer
+          title: Input Tokens
+          description: Number of billable input tokens used to evaluate the request.
+          examples:
+          - 120
+        output_tokens:
+          type: integer
+          title: Output Tokens
+          description: Number of output tokens used to answer the questions. Output tokens are currently free of charge.
+          examples:
+          - 12
+      type: object
+      required:
+      - input_tokens
+      - output_tokens
+      title: Usage
+      description: Token usage for the request.
     HTTPValidationError:
       properties:
         detail:
@@ -81,18 +181,120 @@ components:
       - type
       title: NoulAnswer
       description: The probability of a yes answer or a true statement.
-    Question:
-      oneOf:
-      - $ref: '#/components/schemas/NoulQuestion'
-      - $ref: '#/components/schemas/ChoiceQuestion'
-      - $ref: '#/components/schemas/ScoreQuestion'
-      description: A question about the supplied content.
-      discriminator:
-        propertyName: type
-        mapping:
-          choice: '#/components/schemas/ChoiceQuestion'
-          noul: '#/components/schemas/NoulQuestion'
-          score: '#/components/schemas/ScoreQuestion'
+    SystemOneRequest:
+      properties:
+        state:
+          anyOf:
+          - type: string
+          - additionalProperties: true
+            type: object
+          - items: {}
+            type: array
+          title: State
+          description: The content all questions in this request refer to.
+          examples:
+          - I was charged twice. Please help.
+          - message: Please help.
+            subject: Duplicate charge
+        model:
+          type: string
+          title: Model
+          description: Name or alias of the model to use. Available names are returned by GET /v1/models.
+          examples:
+          - jev-latest
+        questions:
+          additionalProperties:
+            $ref: '#/components/schemas/Question'
+          type: object
+          minProperties: 1
+          title: Questions
+          description: Questions to ask about the content, each with a name you choose. The response uses those names to identify the answers.
+          examples:
+          - billing:
+              instructions: Is this message about billing?
+              type: noul
+      type: object
+      required:
+      - model
+      - questions
+      - state
+      title: SystemOneRequest
+      description: Content and named questions to evaluate together using a TypeSafe model.
+    SystemOneResponse:
+      properties:
+        model:
+          type: string
+          title: Model
+          description: Name of the model that answered the questions. May differ from the alias supplied in the request.
+          examples:
+          - jev-latest
+        answers:
+          additionalProperties:
+            $ref: '#/components/schemas/Answer'
+          type: object
+          minProperties: 1
+          title: Answers
+          description: Answers keyed by the question names supplied in the request. Each answer's type matches its question's type.
+          examples:
+          - billing:
+              noul: 0.98
+              type: noul
+        usage:
+          $ref: '#/components/schemas/Usage'
+          description: Input and output token counts for this evaluation.
+          examples:
+          - input_tokens: 120
+            output_tokens: 12
+      type: object
+      required:
+      - model
+      - answers
+      - usage
+      title: SystemOneResponse
+      description: Answers grouped by question name, with the model used and token usage.
+    ScoreQuestion:
+      properties:
+        type:
+          type: string
+          const: score
+          title: Type
+          description: Identifies a question that rates the content using the levels in criteria.
+          examples:
+          - score
+        instructions:
+          anyOf:
+          - type: string
+          - additionalProperties: true
+            type: object
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Instructions
+          description: What the model should rate.
+          examples:
+          - How urgent is this message?
+        criteria:
+          items:
+            anyOf:
+            - type: string
+            - additionalProperties: true
+              type: object
+            - items: {}
+              type: array
+          type: array
+          minItems: 1
+          title: Criteria
+          description: Ordered descriptions of the score levels. Each description's position determines its score, starting at zero.
+          examples:
+          - - Can wait
+            - Needs attention this week
+            - Needs attention today
+      type: object
+      required:
+      - criteria
+      - type
+      title: ScoreQuestion
+      description: A question that assigns a score using an ordered rubric.
     ScoreAnswer:
       properties:
         type:
@@ -148,299 +350,6 @@ components:
       - type
       title: ScoreAnswer
       description: An expected score with its rubric, confidence, and score-level probabilities.
-    ScoreQuestion:
-      properties:
-        type:
-          type: string
-          const: score
-          title: Type
-          description: Identifies a question that rates the content using the levels in criteria.
-          examples:
-          - score
-        instructions:
-          anyOf:
-          - type: string
-          - additionalProperties: true
-            type: object
-          - items: {}
-            type: array
-          - type: 'null'
-          title: Instructions
-          description: What the model should rate.
-          examples:
-          - How urgent is this message?
-        criteria:
-          items:
-            anyOf:
-            - type: string
-            - additionalProperties: true
-              type: object
-            - items: {}
-              type: array
-          type: array
-          minItems: 1
-          title: Criteria
-          description: Ordered descriptions of the score levels. Each description's position determines its score, starting at zero.
-          examples:
-          - - Can wait
-            - Needs attention this week
-            - Needs attention today
-      type: object
-      required:
-      - criteria
-      - type
-      title: ScoreQuestion
-      description: A question that assigns a score using an ordered rubric.
-    NoulCriteria:
-      properties:
-        'true':
-          anyOf:
-          - type: string
-          - additionalProperties: true
-            type: object
-          - items: {}
-            type: array
-          - type: 'null'
-          title: 'True'
-          description: What counts as a yes answer.
-          examples:
-          - The message is unsolicited advertising.
-        'false':
-          anyOf:
-          - type: string
-          - additionalProperties: true
-            type: object
-          - items: {}
-            type: array
-          - type: 'null'
-          title: 'False'
-          description: What counts as a no answer.
-          examples:
-          - The message is a legitimate conversation.
-      type: object
-      title: NoulCriteria
-      description: Criteria defining what counts as a yes or no answer.
-    ChoiceAnswer:
-      properties:
-        type:
-          type: string
-          const: choice
-          title: Type
-          description: Identifies a selection from the requested choices.
-          examples:
-          - choice
-        choice:
-          type: string
-          title: Choice
-          description: The name of the choice with the highest probability among the question's criteria.
-          examples:
-          - angry
-        confidence:
-          type: number
-          title: Confidence
-          description: Confidence in the selected choice, from 0 to 1. Higher values indicate greater certainty; use lower values to flag uncertain selections for review.
-          examples:
-          - 0.9
-        probabilities:
-          additionalProperties:
-            type: number
-          type: object
-          title: Probabilities
-          description: Probability of each choice in criteria, keyed by choice name, from 0 to 1. Shows how likely the alternatives are; values sum to approximately 1.
-          examples:
-          - angry: 0.8
-            calm: 0.1
-            excited: 0.1
-      type: object
-      required:
-      - choice
-      - confidence
-      - probabilities
-      - type
-      title: ChoiceAnswer
-      description: The selected choice, confidence, and probabilities for a choice question.
-    ChoiceQuestion:
-      properties:
-        type:
-          type: string
-          const: choice
-          title: Type
-          description: Identifies a question that selects one of the choices in criteria.
-          examples:
-          - choice
-        instructions:
-          anyOf:
-          - type: string
-          - additionalProperties: true
-            type: object
-          - items: {}
-            type: array
-          - type: 'null'
-          title: Instructions
-          description: What the model should decide when choosing an option.
-          examples:
-          - What is the tone of this message?
-        criteria:
-          additionalProperties:
-            anyOf:
-            - type: string
-            - additionalProperties: true
-              type: object
-            - items: {}
-              type: array
-            - type: 'null'
-          type: object
-          title: Criteria
-          description: Choice names and descriptions of when each applies. A choice without a description is interpreted by its name alone.
-          examples:
-          - angry: An upset or hostile message
-            calm: A neutral or polite message
-            excited: An enthusiastic or eager message
-      type: object
-      required:
-      - criteria
-      - type
-      title: ChoiceQuestion
-      description: A question that selects one option from the choices you define.
-    Usage:
-      properties:
-        input_tokens:
-          type: integer
-          title: Input Tokens
-          description: Number of billable input tokens used to evaluate the request.
-          examples:
-          - 120
-        output_tokens:
-          type: integer
-          title: Output Tokens
-          description: Number of output tokens used to answer the questions. Output tokens are currently free of charge.
-          examples:
-          - 12
-      type: object
-      required:
-      - input_tokens
-      - output_tokens
-      title: Usage
-      description: Token usage for the request.
-    NoulQuestion:
-      properties:
-        type:
-          type: string
-          const: noul
-          title: Type
-          description: Identifies a yes/no question or statement.
-          examples:
-          - noul
-        instructions:
-          anyOf:
-          - type: string
-          - additionalProperties: true
-            type: object
-          - items: {}
-            type: array
-          - type: 'null'
-          title: Instructions
-          description: The yes/no question or statement to evaluate.
-          examples:
-          - Is this message spam?
-          - This message contains unsolicited advertising.
-          - task: Identify unsolicited advertising.
-        criteria:
-          anyOf:
-          - $ref: '#/components/schemas/NoulCriteria'
-          - type: 'null'
-          description: Criteria clarifying what counts as a yes or no answer.
-          examples:
-          - 'false': A legitimate conversation
-            'true': Unsolicited advertising
-      type: object
-      title: NoulQuestion
-      description: A yes/no question or statement, answered with the probability of yes or true.
-      required:
-      - type
-    SystemOneRequest:
-      properties:
-        state:
-          anyOf:
-          - type: string
-          - additionalProperties: true
-            type: object
-          - items: {}
-            type: array
-          title: State
-          description: The content all questions in this request refer to.
-          examples:
-          - I was charged twice. Please help.
-          - message: Please help.
-            subject: Duplicate charge
-        model:
-          type: string
-          title: Model
-          description: Name or alias of the model to use. Available names are returned by GET /v1/models.
-          examples:
-          - jev-latest
-        questions:
-          additionalProperties:
-            $ref: '#/components/schemas/Question'
-          type: object
-          minProperties: 1
-          title: Questions
-          description: Questions to ask about the content, each with a name you choose. The response uses those names to identify the answers.
-          examples:
-          - billing:
-              instructions: Is this message about billing?
-              type: noul
-      type: object
-      required:
-      - model
-      - questions
-      - state
-      title: SystemOneRequest
-      description: Content and named questions to evaluate together using a TypeSafe model.
-    Answer:
-      oneOf:
-      - $ref: '#/components/schemas/NoulAnswer'
-      - $ref: '#/components/schemas/ScoreAnswer'
-      - $ref: '#/components/schemas/ChoiceAnswer'
-      description: An answer whose type matches the corresponding question.
-      discriminator:
-        propertyName: type
-        mapping:
-          choice: '#/components/schemas/ChoiceAnswer'
-          noul: '#/components/schemas/NoulAnswer'
-          score: '#/components/schemas/ScoreAnswer'
-    SystemOneResponse:
-      properties:
-        model:
-          type: string
-          title: Model
-          description: Name of the model that answered the questions. May differ from the alias supplied in the request.
-          examples:
-          - jev-latest
-        answers:
-          additionalProperties:
-            $ref: '#/components/schemas/Answer'
-          type: object
-          minProperties: 1
-          title: Answers
-          description: Answers keyed by the question names supplied in the request. Each answer's type matches its question's type.
-          examples:
-          - billing:
-              noul: 0.98
-              type: noul
-        usage:
-          $ref: '#/components/schemas/Usage'
-          description: Input and output token counts for this evaluation.
-          examples:
-          - input_tokens: 120
-            output_tokens: 12
-      type: object
-      required:
-      - model
-      - answers
-      - usage
-      title: SystemOneResponse
-      description: Answers grouped by question name, with the model used and token usage.
     ValidationError:
       properties:
         loc:
@@ -487,6 +396,97 @@ components:
       - type
       title: ValidationError
       description: A request validation error at a specific field or array element.
+    NoulQuestion:
+      properties:
+        type:
+          type: string
+          const: noul
+          title: Type
+          description: Identifies a yes/no question or statement.
+          examples:
+          - noul
+        instructions:
+          anyOf:
+          - type: string
+          - additionalProperties: true
+            type: object
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Instructions
+          description: The yes/no question or statement to evaluate.
+          examples:
+          - Is this message spam?
+          - This message contains unsolicited advertising.
+          - task: Identify unsolicited advertising.
+        criteria:
+          anyOf:
+          - $ref: '#/components/schemas/NoulCriteria'
+          - type: 'null'
+          description: Criteria clarifying what counts as a yes or no answer.
+          examples:
+          - 'false': A legitimate conversation
+            'true': Unsolicited advertising
+      type: object
+      title: NoulQuestion
+      description: A yes/no question or statement, answered with the probability of yes or true.
+      required:
+      - type
+    ChoiceQuestion:
+      properties:
+        type:
+          type: string
+          const: choice
+          title: Type
+          description: Identifies a question that selects one of the choices in criteria.
+          examples:
+          - choice
+        instructions:
+          anyOf:
+          - type: string
+          - additionalProperties: true
+            type: object
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Instructions
+          description: What the model should decide when choosing an option.
+          examples:
+          - What is the tone of this message?
+        criteria:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - additionalProperties: true
+              type: object
+            - items: {}
+              type: array
+            - type: 'null'
+          type: object
+          title: Criteria
+          description: Choice names and descriptions of when each applies. A choice without a description is interpreted by its name alone.
+          examples:
+          - angry: An upset or hostile message
+            calm: A neutral or polite message
+            excited: An enthusiastic or eager message
+      type: object
+      required:
+      - criteria
+      - type
+      title: ChoiceQuestion
+      description: A question that selects one option from the choices you define.
+    Answer:
+      oneOf:
+      - $ref: '#/components/schemas/NoulAnswer'
+      - $ref: '#/components/schemas/ScoreAnswer'
+      - $ref: '#/components/schemas/ChoiceAnswer'
+      description: An answer whose type matches the corresponding question.
+      discriminator:
+        propertyName: type
+        mapping:
+          choice: '#/components/schemas/ChoiceAnswer'
+          noul: '#/components/schemas/NoulAnswer'
+          score: '#/components/schemas/ScoreAnswer'
   securitySchemes:
     HTTPBearer:
       type: http

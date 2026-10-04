@@ -33,33 +33,6 @@ paths:
       - Models
 components:
   schemas:
-    ModelMetadata:
-      properties:
-        name:
-          type: string
-          title: Name
-          description: Model name or alias accepted by the request's model field.
-          examples:
-          - jev-latest
-        description:
-          type: string
-          title: Description
-          description: Human-readable description of the model and its capabilities.
-          examples:
-          - General-purpose system one model.
-        release_date:
-          type: string
-          title: Release Date
-          description: Model release date, formatted as YYYY-MM-DD.
-          examples:
-          - '2026-09-15'
-      type: object
-      required:
-      - name
-      - description
-      - release_date
-      title: ModelMetadata
-      description: A model or model alias available to the authenticated account.
     HTTPValidationError:
       properties:
         detail:
@@ -140,6 +113,33 @@ components:
       - models
       title: ModelMetadataList
       description: Models and aliases available to the authenticated account.
+    ModelMetadata:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Model name or alias accepted by the request's model field.
+          examples:
+          - jev-latest
+        description:
+          type: string
+          title: Description
+          description: Human-readable description of the model and its capabilities.
+          examples:
+          - General-purpose system one model.
+        release_date:
+          type: string
+          title: Release Date
+          description: Model release date, formatted as YYYY-MM-DD.
+          examples:
+          - '2026-09-15'
+      type: object
+      required:
+      - name
+      - description
+      - release_date
+      title: ModelMetadata
+      description: A model or model alias available to the authenticated account.
   securitySchemes:
     HTTPBearer:
       type: http
