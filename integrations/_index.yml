@@ -20,5 +20,5 @@
     note: 'Telnyx re-serves TypeSafe''s System One shape: ''Returns TypeSafe System One-compatible answer shapes'''
     detected_by: hand (2026-10-12, Market layer frontier test)
     detected: '2026-10-12'
-  status: pending-generation
+  status: not-a-workflow
   arazzo: null
