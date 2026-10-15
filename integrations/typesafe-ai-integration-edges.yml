@@ -108,11 +108,39 @@ edges:
     detected: '2026-10-15'
   detected_by: sweep-ai-agents.py
   first_seen: '2026-10-15'
+- partner_name: n8n
+  partner: n8n
+  partner_match: aggregator
+  type: marketplace
+  marketplace: n8n-community
+  channel: open-source-node
+  relationship: ipaas-bridge
+  direction: provider-built
+  evidence: https://www.npmjs.com/package/@typesafe-ai/n8n-nodes-typesafe-ai
+  category: null
+  contract_reference:
+    register: n8n community nodes (npm keyword n8n-community-node-package)
+    spec_file: null
+    role: ipaas-connector:n8n-community
+    registered_name: '@typesafe-ai/n8n-nodes-typesafe-ai'
+    matched_domain: typesafe.ai
+    matched_by: domain
+    detected_by: sweep-workflow-automation.py
+    detected: '2026-10-15'
+    signal_note: one edge per (provider, platform); actions, triggers and usage counts are context, never read
+    package: '@typesafe-ai/n8n-nodes-typesafe-ai'
+    version: 0.9.0
+    published: '2026-09-29T21:32:26.966Z'
+    matched_on: publisher-email
+    builder: provider (package published from the provider's own domain)
+  detected_by: sweep-workflow-automation.py
+  first_seen: '2026-10-15'
 checked:
 - https://a2aregistry.org/api/agents
 - https://api.llmgateway.io/v1/models
 - https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
 - https://github.com/api-evangelist/telnyx/blob/main/openapi/telnyx-decision-models-api-openapi.yml
 - https://openrouter.ai/api/v1/models
+- https://registry.npmjs.org/-/v1/search?text=keywords:n8n-community-node-package
 source:
 - https://a2aregistry.org/api/agents
