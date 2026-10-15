@@ -102,5 +102,5 @@
     published: '2026-09-29T21:32:26.966Z'
     matched_on: publisher-email
     builder: provider (package published from the provider's own domain)
-  status: pending-generation
+  status: not-a-workflow
   arazzo: null
