@@ -50,6 +50,23 @@ components:
       type: object
       title: HTTPValidationError
       description: Request validation failures returned with HTTP status 422.
+    ModelMetadataList:
+      properties:
+        models:
+          items:
+            $ref: '#/components/schemas/ModelMetadata'
+          type: array
+          title: Models
+          description: Available models and aliases. Use a model's name in POST /v1/systemone requests.
+          examples:
+          - - description: General-purpose system one model.
+              name: jev-latest
+              release_date: '2026-09-15'
+      type: object
+      required:
+      - models
+      title: ModelMetadataList
+      description: Models and aliases available to the authenticated account.
     ValidationError:
       properties:
         loc:
@@ -96,23 +113,6 @@ components:
       - type
       title: ValidationError
       description: A request validation error at a specific field or array element.
-    ModelMetadataList:
-      properties:
-        models:
-          items:
-            $ref: '#/components/schemas/ModelMetadata'
-          type: array
-          title: Models
-          description: Available models and aliases. Use a model's name in POST /v1/systemone requests.
-          examples:
-          - - description: General-purpose system one model.
-              name: jev-latest
-              release_date: '2026-09-15'
-      type: object
-      required:
-      - models
-      title: ModelMetadataList
-      description: Models and aliases available to the authenticated account.
     ModelMetadata:
       properties:
         name:
